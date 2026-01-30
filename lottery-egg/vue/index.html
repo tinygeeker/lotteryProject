@@ -645,4 +645,25 @@
                     this.showResult = false;
                 },
                 
-                //
+                // 重置抽奖
+                resetLottery() {
+                    this.eggs = this.eggs.map(egg => ({
+                        id: egg.id,
+                        cracked: false,
+                        animating: false
+                    }));
+                    this.currentPrize = {};
+                    this.showResult = false;
+                    this.winnerHistory = [];
+                    this.loadConfig();
+                },
+                
+                // 返回主页
+                goToHome() {
+                    window.location.href = '../../index.html';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
