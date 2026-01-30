@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抽奖箱 - Vue版本</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        /* 科技感背景线条 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        /* 网格线效果 */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .container {
+            max-width: 800px;
+            width: 90%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+        }
+        header {
+            margin-bottom: 40px;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+        .subtitle {
+            font-size: 1.2em;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .lottery-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 40px 0;
+        }
+        .lottery-box {
+            width: 300px;
+            height: 400px;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            border-radius: 15px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        .lottery-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            background: linear-gradient(90deg, #e6c200, #ffd700);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        .lottery-box::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            background: linear-gradient(90deg, #ffd700, #e6c200);
+            border-top: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        .ticket {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 80px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .ticket:hover {
+            transform: translateX(-50%) translateY(-10px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        .ticket.drawing {
+            animation: drawTicket 2s forwards;
+        }
+        @keyframes drawTicket {
+            0% {
+                bottom: 100px;
+                transform: translateX(-50%) rotate(0deg);
+            }
+            50% {
+                bottom: 200px;
+                transform: translateX(-50%) rotate(10deg);
+            }
+            100% {
+                bottom: 300px;
+                transform: translateX(-50%) rotate(0deg);
+            }
+        }
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #667eea;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+        }
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .result h2 {
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        .result p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.2em;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            flex: 1;
+            margin: 0 10px;
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: 700;
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+        .stat-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9em;
+        }
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            .lottery-box {
+                width: 250px;
+                height: 350px;
+            }
+            .btn {
+                padding: 12px 24px;
+                margin: 10px 0;
+                display: block;
+                width: 100%;
+            }
+            .stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .stat-item {
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="container">
+            <header>
+                <h1>🎁 抽奖箱</h1>
+                <p class="subtitle">点击抽奖按钮，抽取幸运奖品！</p>
+            </header>
+            
+            <div class="lottery-area">
+                <div class="lottery-box">
+                    <div 
+                        class="ticket" 
+                        :class="{ drawing: isDrawing }"
+                    >
+                        {{ ticketText }}
+                    </div>
+                </div>
+                
+                <div>
+                    <button 
+                        class="btn btn-primary" 
+                        @click="startLottery"
+                        :disabled="isDrawing"
+                    >
+                        {{ isDrawing ? '抽奖中...' : '开始抽奖' }}
+                    </button>
+                    <button 
+                        class="btn btn-secondary" 
+                        @click="resetLottery"
+                        :disabled="isDrawing"
+                    >
+                        重置
+                    </button>
+                </div>
+            </div>
+            
+            <div class="result" v-if="showResult">
+                <h2>🎉 恭喜中奖！</h2>
+                <p>{{ prizeResult }}</p>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number">{{ totalDraws }}</div>
+                    <div class="stat-label">总抽奖次数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ winCount }}</div>
+                    <div class="stat-label">中奖次数</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                isDrawing: false,
+                showResult: false,
+                ticketText: '抽奖券',
+                prizeResult: '',
+                totalDraws: 0,
+                winCount: 0,
+                prizes: [
+                    '一等奖',
+                    '二等奖',
+                    '三等奖',
+                    '幸运奖',
+                    '谢谢参与'
+                ]
+            },
+            methods: {
+                startLottery() {
+                    this.isDrawing = true;
+                    this.showResult = false;
+                    this.ticketText = '抽取中...';
+                    
+                    setTimeout(() => {
+                        this.totalDraws++;
+                        const randomIndex = Math.floor(Math.random() * this.prizes.length);
+                        const prize = this.prizes[randomIndex];
+                        
+                        this.ticketText = prize;
+                        this.prizeResult = `获得奖品：${prize}`;
+                        this.showResult = true;
+                        
+                        if (prize !== '谢谢参与') {
+                            this.winCount++;
+                        }
+                        
+                        setTimeout(() => {
+                            this.isDrawing = false;
+                            this.ticketText = '抽奖券';
+                        }, 1000);
+                    }, 2000);
+                },
+                resetLottery() {
+                    this.showResult = false;
+                    this.prizeResult = '';
+                    this.ticketText = '抽奖券';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

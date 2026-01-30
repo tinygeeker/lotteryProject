@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>红包雨抽奖 - 原生 JavaScript</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+        /* 科技感背景线条 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        /* 网格线效果 */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+        .subtitle {
+            font-size: 1.2em;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .lottery-area {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin: 20px;
+        }
+        /* 红包样式 */
+        .red-pack {
+            position: absolute;
+            font-size: 48px;
+            cursor: pointer;
+            animation: fall linear infinite;
+            transition: transform 0.3s ease;
+        }
+        .red-pack:hover {
+            transform: scale(1.2) rotate(15deg);
+        }
+        /* 红包打开动画 */
+        .red-pack.open {
+            animation: openRedPack 0.5s forwards;
+        }
+        @keyframes fall {
+            0% {
+                top: -50px;
+                transform: translateX(0) rotate(0deg);
+            }
+            100% {
+                top: 100vh;
+                transform: translateX(100px) rotate(360deg);
+            }
+        }
+        @keyframes openRedPack {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.5) rotate(360deg);
+            }
+            100% {
+                transform: scale(0) rotate(720deg);
+            }
+        }
+        /* 结果展示 */
+        .result {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            display: none;
+        }
+        .result.show {
+            display: block;
+            animation: popIn 0.3s forwards;
+        }
+        @keyframes popIn {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+        .result h2 {
+            color: #ff4d4f;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        .result p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #ff4d4f, #ff7a7a);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(255, 77, 79, 0.4);
+        }
+        .btn-secondary {
+            background: rgba(0, 0, 0, 0.1);
+            color: #333;
+        }
+        .btn-secondary:hover {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        .controls {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .stats {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #ffd700;
+        }
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+            .red-pack {
+                font-size: 32px;
+            }
+            .result {
+                padding: 30px;
+                margin: 20px;
+            }
+            .stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧧 红包雨抽奖</h1>
+            <p class="subtitle">点击飘落的红包，赢取惊喜奖品！</p>
+        </header>
+        
+        <div class="lottery-area" id="lotteryArea">
+            <!-- 红包将通过JS动态生成 -->
+        </div>
+        
+        <div class="controls">
+            <button class="btn btn-primary" id="startBtn">开始红包雨</button>
+            <button class="btn btn-secondary" id="stopBtn">停止</button>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalPacks">0</div>
+                    <div>总红包数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="caughtPacks">0</div>
+                    <div>已抢红包</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="winCount">0</div>
+                    <div>中奖次数</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 结果弹窗 -->
+    <div class="result" id="result">
+        <h2>🎉 恭喜中奖！</h2>
+        <p id="prizeName">获得奖品：</p>
+        <button class="btn btn-primary" id="continueBtn">继续抢红包</button>
+        <button class="btn btn-secondary" id="closeBtn">关闭</button>
+    </div>
+    
+    <script>
+        // 奖品配置
+        const prizes = [
+            { name: '一等奖', probability: 0.05, icon: '🏆' },
+            { name: '二等奖', probability: 0.1, icon: '🎁' },
+            { name: '三等奖', probability: 0.2, icon: '💰' },
+            { name: '安慰奖', probability: 0.65, icon: '🧧' }
+        ];
+        
+        let redPackInterval;
+        let isRunning = false;
+        let totalPacks = 0;
+        let caughtPacks = 0;
+        let winCount = 0;
+        
+        const lotteryArea = document.getElementById('lotteryArea');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const result = document.getElementById('result');
+        const prizeName = document.getElementById('prizeName');
+        const continueBtn = document.getElementById('continueBtn');
+        const closeBtn = document.getElementById('closeBtn');
+        const totalPacksEl = document.getElementById('totalPacks');
+        const caughtPacksEl = document.getElementById('caughtPacks');
+        const winCountEl = document.getElementById('winCount');
+        
+        // 生成随机红包
+        function createRedPack() {
+            if (!isRunning) return;
+            
+            const redPack = document.createElement('div');
+            redPack.className = 'red-pack';
+            redPack.textContent = '🧧';
+            
+            // 随机位置和动画时间
+            const left = Math.random() * (window.innerWidth - 50);
+            const duration = 3 + Math.random() * 5; // 3-8秒
+            
+            redPack.style.left = left + 'px';
+            redPack.style.animationDuration = duration + 's';
+            
+            // 点击红包
+            redPack.addEventListener('click', function() {
+                if (redPack.classList.contains('open')) return;
+                
+                redPack.classList.add('open');
+                caughtPacks++;
+                caughtPacksEl.textContent = caughtPacks;
+                
+                // 移除点击事件
+                redPack.style.pointerEvents = 'none';
+                
+                // 检查是否中奖
+                const random = Math.random();
+                let currentProbability = 0;
+                let wonPrize = null;
+                
+                for (const prize of prizes) {
+                    currentProbability += prize.probability;
+                    if (random <= currentProbability) {
+                        wonPrize = prize;
+                        break;
+                    }
+                }
+                
+                if (wonPrize) {
+                    winCount++;
+                    winCountEl.textContent = winCount;
+                    showResult(wonPrize);
+                }
+                
+                // 移除红包
+                setTimeout(() => {
+                    redPack.remove();
+                }, 500);
+            });
+            
+            lotteryArea.appendChild(redPack);
+            totalPacks++;
+            totalPacksEl.textContent = totalPacks;
+            
+            // 自动移除掉出屏幕的红包
+            setTimeout(() => {
+                if (redPack.parentNode) {
+                    redPack.remove();
+                }
+            }, duration * 1000);
+        }
+        
+        // 显示中奖结果
+        function showResult(prize) {
+            prizeName.textContent = `获得奖品：${prize.icon} ${prize.name}`;
+            result.classList.add('show');
+        }
+        
+        // 开始红包雨
+        function startRedPackRain() {
+            if (isRunning) return;
+            
+            isRunning = true;
+            startBtn.textContent = '红包雨进行中...';
+            startBtn.disabled = true;
+            
+            // 每300毫秒生成一个红包
+            redPackInterval = setInterval(createRedPack, 300);
+        }
+        
+        // 停止红包雨
+        function stopRedPackRain() {
+            isRunning = false;
+            clearInterval(redPackInterval);
+            startBtn.textContent = '开始红包雨';
+            startBtn.disabled = false;
+            
+            // 清空所有红包
+            const redPacks = document.querySelectorAll('.red-pack');
+            redPacks.forEach(pack => pack.remove());
+        }
+        
+        // 事件监听器
+        startBtn.addEventListener('click', startRedPackRain);
+        stopBtn.addEventListener('click', stopRedPackRain);
+        
+        continueBtn.addEventListener('click', function() {
+            result.classList.remove('show');
+        });
+        
+        closeBtn.addEventListener('click', function() {
+            result.classList.remove('show');
+        });
+        
+        // 初始化
+        function init() {
+            // 预生成一些红包
+            for (let i = 0; i < 5; i++) {
+                setTimeout(createRedPack, i * 500);
+            }
+        }
+        
+        // 页面加载完成后初始化
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>

@@ -15,9 +15,8 @@
             background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
             color: white;
             min-height: 100vh;
-            padding: 20px;
             position: relative;
-            overflow-x: hidden;
+            overflow: hidden;
         }
         /* 科技感背景线条 */
         body::before {
@@ -29,7 +28,7 @@
             height: 100%;
             background: 
                 radial-gradient(circle at 20% 50%, rgba(121, 219, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 107, 107, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(121, 219, 255, 0.1) 0%, transparent 50%),
                 radial-gradient(circle at 40% 80%, rgba(121, 219, 255, 0.1) 0%, transparent 50%);
             pointer-events: none;
             z-index: -1;
@@ -50,12 +49,11 @@
             z-index: -1;
         }
         .container {
-            max-width: 1200px;
-            width: 100%;
+            max-width: 1000px;
             margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
         }
         header {
             text-align: center;
@@ -63,7 +61,7 @@
             padding: 30px 0;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 15px;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             position: relative;
             overflow: hidden;
@@ -83,7 +81,7 @@
             100% { left: 100%; }
         }
         h1 {
-            font-size: 2.8em;
+            font-size: 2.5em;
             margin-bottom: 15px;
             color: #00f0ff;
             text-shadow: 0 0 30px rgba(0, 240, 255, 0.6);
@@ -91,147 +89,109 @@
             letter-spacing: 2px;
         }
         .subtitle {
-            font-size: 1.2em;
+            font-size: 1.1em;
             color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 10px;
         }
-        .main-content {
-            display: flex;
-            gap: 40px;
-            flex: 1;
-            margin-bottom: 40px;
-        }
-        .left-section {
-            flex: 1;
+        .scratch-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-        }
-        .right-section {
-            width: 350px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 30px;
-            position: sticky;
-            top: 40px;
-            height: fit-content;
-        }
-        .scratch-instructions {
-            font-size: 1.2em;
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 30px;
-            text-align: center;
+            margin: 40px 0;
         }
         .scratch-card {
             position: relative;
-            width: 400px;
-            height: 200px;
-            background: linear-gradient(45deg, #00f0ff, #00a3ff);
+            width: 500px;
+            height: 300px;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
             border-radius: 15px;
-            margin-bottom: 40px;
-            box-shadow: 0 0 50px rgba(0, 240, 255, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             overflow: hidden;
-            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%2300f0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>'), auto;
-            transition: all 0.3s ease;
         }
-        .scratch-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0 60px rgba(0, 240, 255, 0.4);
-        }
-        .scratch-overlay {
+        /* 奖品信息 */
+        .prize-info {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 2;
-            background: linear-gradient(45deg, rgba(0, 240, 255, 0.1), rgba(0, 163, 255, 0.1));
-            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #d63031;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
+        .prize-info.revealed {
+            opacity: 1;
+        }
+        .prize-emoji {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        .number-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            padding: 30px;
+            width: 100%;
+            height: 100%;
+            align-items: center;
+            justify-items: center;
+        }
+        .number-cell {
+            width: 60px;
+            height: 60px;
+            background: #fff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .winning-numbers {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1.2em;
+            color: #00f0ff;
+        }
+        .winning-numbers span {
+            color: #f39c12;
+            font-weight: bold;
+            margin: 0 5px;
+        }
+        /* 刮擦画布 */
         .scratch-canvas {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 3;
-            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="%2300f0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>'), auto;
-        }
-        .scratch-content {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 1;
-            padding: 20px;
-            background: radial-gradient(circle at center, rgba(0, 240, 255, 0.2), transparent 70%);
-        }
-        .prize-title {
-            font-size: 2em;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: white;
-            text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
-        }
-        .prize-info {
-            font-size: 1.2em;
-            color: rgba(255, 255, 255, 0.9);
-        }
-        .stats {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 40px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            width: 100%;
-            max-width: 400px;
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 20px;
-            margin-top: 15px;
-        }
-        .stat-item {
-            text-align: center;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            border-left: 3px solid #00f0ff;
-        }
-        .stat-value {
-            font-size: 1.8em;
-            font-weight: bold;
-            color: #00f0ff;
-            margin-bottom: 5px;
-            text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
-        }
-        .stat-label {
-            font-size: 0.9em;
-            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
         }
         .controls {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            width: 100%;
-            max-width: 400px;
+            text-align: center;
+            margin: 40px 0;
         }
         .btn {
-            padding: 14px 30px;
+            padding: 16px 32px;
             border: none;
             border-radius: 25px;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0 10px;
             position: relative;
             overflow: hidden;
         }
@@ -251,15 +211,10 @@
         .btn-primary {
             background: linear-gradient(45deg, #00f0ff, #00a3ff);
             color: #0f0c29;
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
         }
-        .btn-primary:hover:not(:disabled) {
+        .btn-primary:hover {
             transform: scale(1.05);
-            box-shadow: 0 0 30px rgba(0, 240, 255, 0.8);
-        }
-        .btn-primary:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+            box-shadow: 0 10px 20px rgba(0, 240, 255, 0.4);
         }
         .btn-secondary {
             background: rgba(255, 255, 255, 0.1);
@@ -270,220 +225,114 @@
             background: rgba(255, 255, 255, 0.15);
             box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
         }
-        .section-title {
-            font-size: 1.4em;
-            margin-bottom: 20px;
+        .result-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 40px;
+            border: 1px solid rgba(0, 240, 255, 0.2);
+        }
+        .result-section h2 {
             color: #00f0ff;
-            text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
-            font-weight: 600;
-            text-align: center;
-            position: relative;
+            margin-bottom: 20px;
+            font-size: 1.5em;
         }
-        .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #00f0ff, transparent);
-        }
-        .winner-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            max-height: 500px;
+        .result-list {
+            max-height: 200px;
             overflow-y: auto;
         }
-        .winner-list::-webkit-scrollbar {
-            width: 8px;
-        }
-        .winner-list::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-        }
-        .winner-list::-webkit-scrollbar-thumb {
-            background: rgba(0, 240, 255, 0.3);
-            border-radius: 10px;
-        }
-        .winner-list::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 240, 255, 0.5);
-        }
-        .winner-item {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 14px;
+        .result-item {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
-            flex-direction: column;
-            gap: 5px;
-            border-left: 4px solid #00f0ff;
-            transition: all 0.3s ease;
+            justify-content: space-between;
+            align-items: center;
         }
-        .winner-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateX(5px);
+        .result-item:last-child {
+            border-bottom: none;
         }
-        .winner-prize {
-            font-weight: bold;
+        .result-item .prize {
+            font-weight: 600;
             color: #00f0ff;
-            font-size: 1.1em;
         }
-        .winner-name {
-            color: rgba(255, 255, 255, 0.9);
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
         }
-        .winner-time {
-            color: rgba(255, 255, 255, 0.6);
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            flex: 1;
+            margin: 0 10px;
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: 700;
+            color: #00f0ff;
+            margin-bottom: 10px;
+        }
+        .stat-label {
+            color: rgba(255, 255, 255, 0.8);
             font-size: 0.9em;
         }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            backdrop-filter: blur(10px);
-            align-items: center;
-            justify-content: center;
-        }
-        .modal.show {
-            display: flex;
-        }
-        .modal-content {
-            background: linear-gradient(135deg, #0f0c29, #302b63);
-            padding: 60px 40px;
-            border-radius: 20px;
-            text-align: center;
-            border: 2px solid #00f0ff;
-            box-shadow: 0 0 50px rgba(0, 240, 255, 0.5);
-            min-width: 400px;
-            position: relative;
-            overflow: hidden;
-        }
-        .modal-content::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.1), transparent);
-            animation: shine 3s infinite;
-        }
-        .modal-content h2 {
-            font-size: 2em;
-            margin-bottom: 20px;
-            color: #00f0ff;
-            text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
-        }
-        .modal-prize {
-            font-size: 1.5em;
-            margin-bottom: 20px;
-            color: white;
-        }
-        .modal-winner {
-            font-size: 1.2em;
-            margin-bottom: 30px;
-            color: rgba(255, 255, 255, 0.9);
-        }
-        .modal-btn {
-            padding: 14px 30px;
-            border: none;
-            border-radius: 25px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            background: linear-gradient(45deg, #00f0ff, #00a3ff);
-            color: #0f0c29;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        .modal-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s ease;
-        }
-        .modal-btn:hover::before {
-            left: 100%;
-        }
-        .modal-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
-        }
-        @keyframes scratch {
-            0% {
-                opacity: 1;
-            }
-            100% {
-                opacity: 0;
-            }
-        }
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
-            }
-            50% {
-                box-shadow: 0 0 40px rgba(0, 240, 255, 0.8);
-            }
-            100% {
-                box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
-            }
-        }
-        footer {
-            text-align: center;
-            padding: 30px 0;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 1em;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 10px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .footer-tech {
-            color: #00f0ff;
-            font-weight: 500;
-        }
         /* 响应式设计 */
-        @media (max-width: 1024px) {
-            .main-content {
-                flex-direction: column;
-            }
-            .right-section {
-                width: 100%;
-                position: static;
-            }
-        }
         @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
             h1 {
-                font-size: 2.2em;
+                font-size: 2em;
             }
             .scratch-card {
-                width: 350px;
-                height: 180px;
+                width: 100%;
+                height: 250px;
             }
-            .prize-title {
-                font-size: 1.8em;
+            .scratch-canvas {
+                width: 100% !important;
+                height: 100% !important;
             }
-            .controls {
-                flex-direction: column;
-                align-items: center;
+            .number-grid {
+                gap: 10px;
+                padding: 20px;
+            }
+            .number-cell {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2em;
             }
             .btn {
-                width: 200px;
-                text-align: center;
+                padding: 12px 24px;
+                margin: 10px 0;
+                display: block;
+                width: 100%;
+                max-width: 300px;
             }
-            .stats-grid {
-                grid-template-columns: repeat(3, 1fr);
+            .stats {
+                flex-direction: column;
+                gap: 15px;
             }
+            .stat-item {
+                margin: 0;
+            }
+        }
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 240, 255, 0.5);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 240, 255, 0.7);
         }
     </style>
 </head>
@@ -491,148 +340,177 @@
     <div class="container">
         <header>
             <h1>🎫 刮刮乐抽奖</h1>
-            <p class="subtitle">用鼠标刮开涂层，查看中奖结果</p>
+            <p class="subtitle">刮开涂层，查看中奖结果</p>
         </header>
         
-        <div class="main-content">
-            <div class="left-section">
-                <div class="scratch-instructions">请用鼠标在下方卡片上刮一刮</div>
-                
-                <div class="scratch-card" id="scratchCard">
-                    <div class="scratch-content">
-                        <div class="prize-title" id="prizeTitle">刮开查看</div>
-                        <div class="prize-info" id="prizeInfo">奖品信息</div>
-                    </div>
-                    <div class="scratch-overlay" id="scratchOverlay">
-                        <canvas class="scratch-canvas" id="scratchCanvas" width="400" height="200"></canvas>
+        <div class="scratch-container">
+            <div class="scratch-card">
+                <div class="prize-info" id="prizeInfo">
+                    <div class="number-grid" id="numberGrid">
+                        <!-- Number grid will be generated by JavaScript -->
                     </div>
                 </div>
-                
-                <div class="stats">
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <div class="stat-value" id="prizeCount">0</div>
-                            <div class="stat-label">奖品数量</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value" id="participantCount">0</div>
-                            <div class="stat-label">参与人数</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value" id="winnerCount">0</div>
-                            <div class="stat-label">中奖人数</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="controls">
-                    <button class="btn btn-primary" id="newCardBtn" onclick="generateNewCard">新卡刮奖</button>
-                    <button class="btn btn-secondary" onclick="resetLottery">重置抽奖</button>
-                    <button class="btn btn-secondary" onclick="location.href='../../index.html'">返回主页</button>
-                </div>
+                <canvas class="scratch-canvas" id="scratchCanvas" width="500" height="300"></canvas>
             </div>
             
-            <div class="right-section">
-                <h2 class="section-title">🏆 中奖记录</h2>
-                <div class="winner-list" id="winnerList"></div>
+            <div class="winning-numbers" id="winningNumbers">
+                中奖号码: <span id="winningNumbersList">-- -- -- -- --</span>
+            </div>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="resetBtn">重新生成刮刮乐</button>
+                <button class="btn btn-secondary" id="revealBtn">直接查看结果</button>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number" id="scratchCount">0</div>
+                <div class="stat-label">已刮次数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="winCount">0</div>
+                <div class="stat-label">中奖次数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="winRate">0%</div>
+                <div class="stat-label">中奖率</div>
+            </div>
+        </div>
+        
+        <div class="result-section">
+            <h2>🎁 中奖记录</h2>
+            <div class="result-list" id="resultList">
+                <!-- 中奖记录将通过 JavaScript 动态添加 -->
             </div>
         </div>
     </div>
-    
-    <!-- 中奖结果模态框 -->
-    <div class="modal" id="resultModal">
-        <div class="modal-content">
-            <h2>🎉 恭喜中奖！</h2>
-            <div class="modal-prize" id="modalPrize"></div>
-            <div class="modal-winner" id="modalWinner"></div>
-            <button class="modal-btn" onclick="closeModal()">确定</button>
-        </div>
-    </div>
-    
-    <footer>
-        <p>© 2026 抽奖系统 | 原生 JavaScript 版本</p>
-        <p style="margin-top: 10px; font-size: 0.9em;">Powered by <a href="https://github.com/tinygeeker" target="_blank" class="footer-tech">tinygeeker</a></p>
-    </footer>
     
     <script>
-        let config = {
-            prizes: [],
-            participants: [],
-            settings: {
-                lotteryName: "刮刮乐抽奖",
-                bgColor: "#1a1a2e",
-                textColor: "#ffffff",
-                buttonColor: "#e94560"
-            }
+        // 配置项
+        const config = {
+            scratchThreshold: 0.3, // 刮开30%显示结果
+            prizeLevels: [
+                { matches: 5, name: '一等奖', emoji: '🏆' },
+                { matches: 4, name: '二等奖', emoji: '🎁' },
+                { matches: 3, name: '三等奖', emoji: '💰' },
+                { matches: 2, name: '四等奖', emoji: '🎊' },
+                { matches: 1, name: '五等奖', emoji: '🎉' },
+                { matches: 0, name: '谢谢参与', emoji: '🎫' }
+            ]
         };
         
-        let winners = [];
-        let isScratching = false;
+        // 全局变量
+        let scratchCount = 0;
+        let winCount = 0;
+        let prizeResult = [];
         let currentPrize = null;
-        let canvas, ctx;
-        let hasRevealed = false;
+        let isScratched = false;
+        let winningNumbers = [];
+        let cardNumbers = [];
+        let matchCount = 0;
         
-        // 加载配置
-        async function loadConfig() {
-            try {
-                const response = await fetch('../../config/lottery_config.json');
-                const data = await response.json();
-                config = data;
-                updateStats();
-                updateWinnerList();
-                generateNewCard();
-            } catch (error) {
-                console.error('加载配置失败:', error);
-                // 使用默认配置
-                config.prizes = [
-                    { id: 1, title: '一等奖', image: '', count: 1, winner: '', probability: 5 },
-                    { id: 2, title: '二等奖', image: '', count: 2, winner: '', probability: 10 },
-                    { id: 3, title: '三等奖', image: '', count: 3, winner: '', probability: 15 },
-                    { id: 4, title: '四等奖', image: '', count: 5, winner: '', probability: 20 },
-                    { id: 5, title: '五等奖', image: '', count: 10, winner: '', probability: 50 }
-                ];
-                config.participants = ['张三', '李四', '王五', '赵六', '钱七', '孙八', '周九', '吴十'];
-                updateStats();
-                updateWinnerList();
-                generateNewCard();
-            }
-        }
+        // DOM 元素
+        const canvas = document.getElementById('scratchCanvas');
+        const ctx = canvas.getContext('2d');
+        const prizeInfo = document.getElementById('prizeInfo');
+        const numberGrid = document.getElementById('numberGrid');
+        const winningNumbersList = document.getElementById('winningNumbersList');
+        const resetBtn = document.getElementById('resetBtn');
+        const revealBtn = document.getElementById('revealBtn');
+        const scratchCountEl = document.getElementById('scratchCount');
+        const winCountEl = document.getElementById('winCount');
+        const winRateEl = document.getElementById('winRate');
+        const resultListEl = document.getElementById('resultList');
         
-        // 更新统计信息
-        function updateStats() {
-            document.getElementById('prizeCount').textContent = config.prizes.length;
-            document.getElementById('participantCount').textContent = config.participants.length;
-            document.getElementById('winnerCount').textContent = winners.length;
-        }
-        
-        // 初始化Canvas
-        function initCanvas() {
-            canvas = document.getElementById('scratchCanvas');
-            ctx = canvas.getContext('2d');
+        // 初始化
+        function init() {
+            // 生成刮刮乐
+            generateScratchCard();
             
-            // 绘制刮涂层
-            drawScratchOverlay();
+            // 事件监听
+            resetBtn.addEventListener('click', generateScratchCard);
+            revealBtn.addEventListener('click', revealResult);
             
-            // 添加鼠标事件
-            canvas.addEventListener('mousedown', startScratching);
-            canvas.addEventListener('mouseup', stopScratching);
+            // 刮擦事件
+            canvas.addEventListener('mousedown', startScratch);
             canvas.addEventListener('mousemove', scratch);
+            canvas.addEventListener('mouseup', stopScratch);
+            canvas.addEventListener('mouseleave', stopScratch);
             
-            // 添加触摸事件支持
-            canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
-            canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
-            canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+            // 触摸事件
+            canvas.addEventListener('touchstart', startScratch);
+            canvas.addEventListener('touchmove', scratch);
+            canvas.addEventListener('touchend', stopScratch);
         }
         
-        // 绘制刮涂层
-        function drawScratchOverlay() {
-            // 绘制背景
-            ctx.fillStyle = '#333';
+        // 生成刮刮乐
+        function generateScratchCard() {
+            // 重置状态
+            isScratched = false;
+            prizeInfo.classList.remove('revealed');
+            
+            // 生成中奖号码
+            winningNumbers = generateUniqueNumbers(1, 30, 5);
+            
+            // 生成卡片号码
+            cardNumbers = generateUniqueNumbers(1, 30, 5);
+            
+            // 计算匹配数量
+            matchCount = countMatches(winningNumbers, cardNumbers);
+            
+            // 确定奖品
+            currentPrize = config.prizeLevels.find(level => level.matches === matchCount);
+            
+            // 更新号码网格
+            updateNumberGrid();
+            
+            // 更新中奖号码显示
+            winningNumbersList.textContent = winningNumbers.join('  ');
+            
+            // 绘制涂层
+            drawCoating();
+        }
+        
+        // 生成指定范围的不重复随机数
+        function generateUniqueNumbers(min, max, count) {
+            const numbers = new Set();
+            while (numbers.size < count) {
+                numbers.add(Math.floor(Math.random() * (max - min + 1)) + min);
+            }
+            return Array.from(numbers).sort((a, b) => a - b);
+        }
+        
+        // 计算两个数组的匹配数量
+        function countMatches(arr1, arr2) {
+            return arr1.filter(num => arr2.includes(num)).length;
+        }
+        
+        // 更新号码网格
+        function updateNumberGrid() {
+            numberGrid.innerHTML = '';
+            cardNumbers.forEach(num => {
+                const cell = document.createElement('div');
+                cell.className = 'number-cell';
+                cell.textContent = num;
+                // 如果是中奖号码，添加特殊样式
+                if (winningNumbers.includes(num)) {
+                    cell.style.backgroundColor = '#f39c12';
+                    cell.style.color = '#fff';
+                }
+                numberGrid.appendChild(cell);
+            });
+        }
+        
+        // 绘制涂层
+        function drawCoating() {
+            // 填充背景
+            ctx.fillStyle = '#9b59b6';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // 添加一些纹理
-            ctx.fillStyle = '#666';
-            for (let i = 0; i < 500; i++) {
+            // 添加纹理
+            ctx.fillStyle = '#8e44ad';
+            for (let i = 0; i < 1000; i++) {
                 const x = Math.random() * canvas.width;
                 const y = Math.random() * canvas.height;
                 const size = Math.random() * 2;
@@ -641,100 +519,58 @@
                 ctx.fill();
             }
             
-            // 添加文字提示
-            ctx.fillStyle = '#999';
-            ctx.font = '20px Arial';
+            // 添加文字
+            ctx.fillStyle = '#ecf0f1';
+            ctx.font = '24px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText('刮开涂层', canvas.width / 2, canvas.height / 2);
         }
         
-        // 生成新的刮刮乐卡片
-        function generateNewCard() {
-            const scratchCard = document.getElementById('scratchCard');
-            
-            document.getElementById('prizeTitle').textContent = '刮开查看';
-            document.getElementById('prizeInfo').textContent = '奖品信息';
-            
-            // 随机选择一个奖品
-            currentPrize = selectRandomPrize();
-            
-            // 重新绘制刮涂层
-            drawScratchOverlay();
-            
-            // 重置状态
-            hasRevealed = false;
-        }
-        
-        // 随机选择奖品
-        function selectRandomPrize() {
-            const prizes = config.prizes.filter(p => p.count > 0);
-            if (prizes.length === 0) {
-                return { title: '谢谢参与', count: 999, winner: '' };
-            }
-            
-            // 根据概率选择奖品
-            const totalProbability = prizes.reduce((sum, p) => sum + p.probability, 0);
-            let random = Math.random() * totalProbability;
-            
-            for (const prize of prizes) {
-                random -= prize.probability;
-                if (random <= 0) {
-                    return prize;
-                }
-            }
-            
-            return prizes[0];
-        }
-        
         // 开始刮擦
-        function startScratching(e) {
+        let isScratching = false;
+        
+        function startScratch(e) {
             isScratching = true;
-            // 开始刮擦时的初始位置
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            scratchAt(x, y);
+            scratch(e);
         }
         
-        // 停止刮擦
-        function stopScratching() {
+        function stopScratch() {
             isScratching = false;
-            
-            // 检查刮擦面积，超过30%时自动显示结果
-            checkScratchProgress();
         }
         
-        // 刮擦
         function scratch(e) {
             if (!isScratching) return;
             
             const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            scratchAt(x, y);
-        }
-        
-        // 在指定位置刮擦
-        function scratchAt(x, y) {
-            // 设置刮擦效果
+            let x, y;
+            
+            if (e.type === 'mousedown' || e.type === 'mousemove') {
+                x = e.clientX - rect.left;
+                y = e.clientY - rect.top;
+            } else {
+                e.preventDefault();
+                x = e.touches[0].clientX - rect.left;
+                y = e.touches[0].clientY - rect.top;
+            }
+            
+            // 刮擦效果
             ctx.globalCompositeOperation = 'destination-out';
-            ctx.lineWidth = 30;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            
             ctx.beginPath();
-            ctx.arc(x, y, 15, 0, Math.PI * 2);
+            ctx.arc(x, y, 20, 0, Math.PI * 2);
             ctx.fill();
+            ctx.globalCompositeOperation = 'source-over';
+            
+            // 检查刮开面积
+            checkScratchProgress();
         }
         
-        // 检查刮擦进度
+        // 检查刮开面积
         function checkScratchProgress() {
-            if (hasRevealed) return;
-            
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const pixels = imageData.data;
             let transparentPixels = 0;
+            let totalPixels = pixels.length / 4;
             
             for (let i = 0; i < pixels.length; i += 4) {
                 if (pixels[i + 3] === 0) {
@@ -742,136 +578,71 @@
                 }
             }
             
-            const scratchPercentage = (transparentPixels / (pixels.length / 4)) * 100;
+            const scratchPercentage = transparentPixels / totalPixels;
             
-            // 当刮擦面积超过30%时显示结果
-            if (scratchPercentage > 30) {
-                revealPrize();
+            if (scratchPercentage >= config.scratchThreshold && !isScratched) {
+                revealResult();
             }
         }
         
-        // 显示奖品
-        function revealPrize() {
-            if (hasRevealed) return;
+        // 显示结果
+        function revealResult() {
+            if (isScratched) return;
             
-            hasRevealed = true;
+            isScratched = true;
+            scratchCount++;
             
-            // 显示中奖结果
-            document.getElementById('prizeTitle').textContent = currentPrize.title;
-            document.getElementById('prizeInfo').textContent = currentPrize.count > 0 ? `剩余: ${currentPrize.count}` : '已抽完';
+            // 显示号码网格
+            prizeInfo.classList.add('revealed');
             
-            // 清除刮涂层
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // 记录结果
+            const result = {
+                id: Date.now(),
+                time: new Date().toLocaleString(),
+                prize: currentPrize.name,
+                emoji: currentPrize.emoji,
+                matches: matchCount
+            };
             
-            // 处理中奖
-            if (currentPrize.count > 0) {
-                // 减少奖品数量
-                currentPrize.count--;
-                
-                // 确定中奖人
-                let winnerName = currentPrize.winner;
-                if (!winnerName && config.participants.length > 0) {
-                    const randomIndex = Math.floor(Math.random() * config.participants.length);
-                    winnerName = config.participants[randomIndex];
-                    // 从参与人员中移除中奖者
-                    config.participants.splice(randomIndex, 1);
-                }
-                
-                // 记录中奖信息
-                const winnerInfo = {
-                    prize: currentPrize.title,
-                    name: winnerName || '未知',
-                    time: new Date().toLocaleString()
-                };
-                winners.push(winnerInfo);
-                
-                // 更新显示
-                updateStats();
-                updateWinnerList();
-                
-                // 显示中奖结果
-                showResult(currentPrize.title, winnerName);
+            prizeResult.unshift(result);
+            
+            // 更新统计
+            updateStats();
+            updateResultList();
+        }
+        
+        // 更新统计
+        function updateStats() {
+            scratchCountEl.textContent = scratchCount;
+            
+            if (currentPrize.name !== '谢谢参与') {
+                winCount++;
             }
-        }
-        
-        // 触摸事件处理
-        function handleTouchStart(e) {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const mouseEvent = new MouseEvent('mousedown', {
-                clientX: touch.clientX,
-                clientY: touch.clientY
-            });
-            canvas.dispatchEvent(mouseEvent);
-        }
-        
-        function handleTouchEnd(e) {
-            e.preventDefault();
-            const mouseEvent = new MouseEvent('mouseup', {});
-            canvas.dispatchEvent(mouseEvent);
-        }
-        
-        function handleTouchMove(e) {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const mouseEvent = new MouseEvent('mousemove', {
-                clientX: touch.clientX,
-                clientY: touch.clientY
-            });
-            canvas.dispatchEvent(mouseEvent);
-        }
-        
-        // 显示中奖结果
-        function showResult(prize, winner) {
-            document.getElementById('modalPrize').textContent = `奖品：${prize}`;
-            document.getElementById('modalWinner').textContent = winner ? `中奖者：${winner}` : '参与奖';
-            document.getElementById('resultModal').classList.add('show');
-        }
-        
-        // 关闭模态框
-        function closeModal() {
-            document.getElementById('resultModal').classList.remove('show');
-        }
-        
-        // 更新中奖记录
-        function updateWinnerList() {
-            const list = document.getElementById('winnerList');
-            list.innerHTML = '';
             
-            winners.forEach((winner, index) => {
+            winCountEl.textContent = winCount;
+            
+            // 计算中奖率
+            const winRate = scratchCount > 0 ? (winCount / scratchCount * 100).toFixed(1) : 0;
+            winRateEl.textContent = winRate + '%';
+        }
+        
+        // 更新结果列表
+        function updateResultList() {
+            resultListEl.innerHTML = '';
+            
+            prizeResult.forEach(result => {
                 const item = document.createElement('div');
-                item.className = 'winner-item';
+                item.className = 'result-item';
                 item.innerHTML = `
-                    <span class="winner-prize">${winner.prize}</span>
-                    <span>→</span>
-                    <span class="winner-name">${winner.name}</span>
+                    <span>${result.time}</span>
+                    <span class="prize">${result.emoji} ${result.prize} (匹配 ${result.matches} 个号码)</span>
                 `;
-                list.appendChild(item);
+                resultListEl.appendChild(item);
             });
-        }
-        
-        // 重置抽奖
-        function resetLottery() {
-            if (confirm('确定要重置抽奖吗？中奖记录将被清空。')) {
-                winners = [];
-                // 恢复奖品数量（这里简化处理，实际应该从配置重新加载）
-                config.prizes.forEach(prize => {
-                    prize.count = prize.id === 1 ? 1 : prize.id === 2 ? 2 : prize.id === 3 ? 3 : prize.id === 4 ? 5 : 10;
-                });
-                // 恢复参与人员
-                config.participants = ['张三', '李四', '王五', '赵六', '钱七', '孙八', '周九', '吴十'];
-                updateStats();
-                updateWinnerList();
-                generateNewCard();
-                alert('抽奖已重置');
-            }
         }
         
         // 初始化
-        window.onload = function() {
-            loadConfig();
-            initCanvas();
-        };
+        init();
     </script>
 </body>
 </html>

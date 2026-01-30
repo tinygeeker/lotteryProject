@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>老虎机 - 原生 JavaScript</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(255, 255, 255, 0.03),
+                rgba(255, 255, 255, 0.03) 10px,
+                rgba(255, 255, 255, 0.02) 10px,
+                rgba(255, 255, 255, 0.02) 20px
+            );
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            gap: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .results-panel {
+            width: 300px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(94, 234, 212, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            overflow-y: auto;
+            max-height: 80vh;
+        }
+
+        h1 {
+            text-align: center;
+            background: linear-gradient(135deg, #5eead4 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 30px;
+            font-size: 28px;
+            position: relative;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #5eead4, transparent);
+        }
+
+        .control-panel {
+            text-align: center;
+            margin: 30px 0;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(94, 234, 212, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .slot-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+            margin: 30px 0;
+        }
+
+        .slot-machine {
+            position: relative;
+            background: linear-gradient(135deg, #8b4513 0%, #a0522d 100%);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .slot-reels {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .slot-reel {
+            width: 120px;
+            height: 150px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            border: 3px solid #d2b48c;
+        }
+
+        .reel-content {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            transition: transform 0.3s ease;
+        }
+
+        .slot-handle {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #ff4500 0%, #ff6347 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            font-size: 24px;
+            color: white;
+        }
+
+        .slot-handle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .slot-handle.pulling {
+            animation: pull 1s ease-in-out;
+        }
+
+        @keyframes pull {
+            0% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(20px);
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            margin: 10px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.6);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #5eead4 0%, #2dd4bf 100%);
+            box-shadow: 0 4px 12px rgba(94, 234, 212, 0.4);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 6px 16px rgba(94, 234, 212, 0.6);
+        }
+
+        .results-panel h3 {
+            text-align: center;
+            color: #5eead4;
+            margin-bottom: 20px;
+            font-size: 18px;
+            border-bottom: 1px solid rgba(94, 234, 212, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .current-result {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .current-result h4 {
+            color: #3b82f6;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .current-result .prize-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fbbf24;
+            margin: 10px 0;
+        }
+
+        .winner-history {
+            margin-top: 20px;
+        }
+
+        .winner-history h4 {
+            color: #94a3b8;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .winner-list {
+            list-style: none;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .winner-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .winner-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(94, 234, 212, 0.3);
+            transform: translateX(5px);
+        }
+
+        .winner-item .prize {
+            font-weight: bold;
+            color: #5eead4;
+            margin-right: 5px;
+        }
+
+        .winner-item .time {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 5px;
+        }
+
+        .result-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .result-content {
+            background: rgba(30, 41, 59, 0.95);
+            border: 1px solid rgba(94, 234, 212, 0.5);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            max-width: 400px;
+            width: 90%;
+            backdrop-filter: blur(10px);
+        }
+
+        .result-title {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #5eead4 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+
+        .result-prize {
+            font-size: 28px;
+            font-weight: bold;
+            color: #fbbf24;
+            margin: 20px 0;
+            text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+        }
+
+        .spark {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #fbbf24;
+            border-radius: 50%;
+            animation: spark 1s ease-out forwards;
+            box-shadow: 0 0 10px #fbbf24, 0 0 20px #fbbf24;
+        }
+
+        @keyframes spark {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0) translate(var(--tx), var(--ty));
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .results-panel {
+                width: 100%;
+                max-height: 400px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+                gap: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .slot-reel {
+                width: 100px;
+                height: 120px;
+            }
+
+            .reel-content {
+                font-size: 36px;
+            }
+
+            .slot-handle {
+                width: 60px;
+                height: 60px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-content">
+            <h1>🎰 老虎机</h1>
+            
+            <div class="control-panel">
+                <button class="btn" id="spin-btn">开始抽奖</button>
+                <button class="btn btn-secondary" onclick="window.location.href='../../index.html'">返回主页</button>
+            </div>
+
+            <div class="slot-container">
+                <div class="slot-machine">
+                    <div class="slot-reels">
+                        <div class="slot-reel">
+                            <div class="reel-content" id="reel1">🍎</div>
+                        </div>
+                        <div class="slot-reel">
+                            <div class="reel-content" id="reel2">🍌</div>
+                        </div>
+                        <div class="slot-reel">
+                            <div class="reel-content" id="reel3">🍒</div>
+                        </div>
+                    </div>
+                    <div class="slot-handle" id="slot-handle">🎰</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-panel">
+            <h3>抽奖结果</h3>
+            <div class="current-result" id="current-result">
+                <h4>当前结果</h4>
+                <div class="prize-name" id="current-prize">等待抽奖</div>
+            </div>
+            <div class="winner-history">
+                <h4>中奖记录</h4>
+                <ul class="winner-list" id="winner-list">
+                    <!-- 中奖记录将通过JavaScript动态生成 -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="result-modal" id="result-modal">
+        <div class="result-content">
+            <div class="result-title">恭喜中奖！</div>
+            <div class="result-prize" id="result-prize"></div>
+            <button class="btn" id="close-modal">确定</button>
+        </div>
+    </div>
+
+    <script>
+        let configData = {};
+        let prizes = [];
+        let winnerHistory = [];
+        let isSpinning = false;
+
+        // 老虎机符号
+        const symbols = ['🍎', '🍌', '🍒', '🍇', '🍊', '🎁', '💰', '⭐'];
+
+        // 加载配置数据
+        async function loadConfig() {
+            try {
+                const response = await fetch('../../config/lottery_config.json');
+                configData = await response.json();
+                prizes = configData.prizes;
+            } catch (error) {
+                console.error('加载配置失败:', error);
+                // 使用默认配置
+                prizes = [
+                    { title: '一等奖', probability: 5 },
+                    { title: '二等奖', probability: 10 },
+                    { title: '三等奖', probability: 15 },
+                    { title: '四等奖', probability: 20 },
+                    { title: '五等奖', probability: 50 }
+                ];
+            }
+        }
+
+        // 初始化
+        async function init() {
+            await loadConfig();
+            setupEventListeners();
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            document.getElementById('spin-btn').addEventListener('click', startSpinning);
+            document.getElementById('slot-handle').addEventListener('click', startSpinning);
+            document.getElementById('close-modal').addEventListener('click', () => {
+                document.getElementById('result-modal').style.display = 'none';
+            });
+
+            // 点击模态框外部关闭
+            document.getElementById('result-modal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('result-modal')) {
+                    document.getElementById('result-modal').style.display = 'none';
+                }
+            });
+        }
+
+        // 开始抽奖
+        function startSpinning() {
+            if (isSpinning) return;
+            isSpinning = true;
+            
+            const spinBtn = document.getElementById('spin-btn');
+            const handle = document.getElementById('slot-handle');
+            
+            // 禁用按钮
+            spinBtn.disabled = true;
+            spinBtn.textContent = '抽奖中...';
+            
+            // 拉动手柄
+            handle.classList.add('pulling');
+            
+            // 创建火花效果
+            createSparks();
+            
+            // 随机选择符号
+            const reel1 = document.getElementById('reel1');
+            const reel2 = document.getElementById('reel2');
+            const reel3 = document.getElementById('reel3');
+            
+            // 旋转第一 reel
+            spinReel(reel1, () => {
+                // 旋转第二 reel
+                spinReel(reel2, () => {
+                    // 旋转第三 reel
+                    spinReel(reel3, () => {
+                        // 延迟显示结果
+                        setTimeout(() => {
+                            // 随机选择奖品
+                            const prize = getRandomPrize();
+                            
+                            showResult(prize);
+                            updateCurrentResult(prize);
+                            addToWinnerHistory(prize);
+                            
+                            // 启用按钮
+                            spinBtn.disabled = false;
+                            spinBtn.textContent = '开始抽奖';
+                            handle.classList.remove('pulling');
+                            isSpinning = false;
+                        }, 500);
+                    });
+                });
+            });
+        }
+
+        // 旋转单个 reel
+        function spinReel(reel, callback) {
+            let spins = 0;
+            const maxSpins = 10;
+            const spinInterval = setInterval(() => {
+                const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+                reel.textContent = randomSymbol;
+                spins++;
+                
+                if (spins >= maxSpins) {
+                    clearInterval(spinInterval);
+                    callback();
+                }
+            }, 100);
+        }
+
+        // 随机选择奖品
+        function getRandomPrize() {
+            if (prizes.length === 0) {
+                return { title: '谢谢参与', description: '很遗憾，没有中奖' };
+            }
+            
+            // 计算总概率
+            const totalProbability = prizes.reduce((sum, prize) => sum + (prize.probability || 1), 0);
+            let random = Math.random() * totalProbability;
+            
+            for (const prize of prizes) {
+                random -= (prize.probability || 1);
+                if (random <= 0) {
+                    return prize;
+                }
+            }
+            
+            return prizes[0];
+        }
+
+        // 显示结果
+        function showResult(prize) {
+            document.getElementById('result-prize').textContent = prize.title;
+            document.getElementById('result-modal').style.display = 'flex';
+        }
+
+        // 更新当前结果
+        function updateCurrentResult(prize) {
+            document.getElementById('current-prize').textContent = prize.title;
+        }
+
+        // 添加到中奖记录
+        function addToWinnerHistory(prize) {
+            const now = new Date();
+            const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+            
+            const winnerItem = {
+                prize: prize.title,
+                time: timeString
+            };
+            
+            winnerHistory.unshift(winnerItem);
+            renderWinnerHistory();
+        }
+
+        // 渲染中奖记录
+        function renderWinnerHistory() {
+            const winnerList = document.getElementById('winner-list');
+            winnerList.innerHTML = '';
+            
+            winnerHistory.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'winner-item';
+                li.innerHTML = `
+                    <span class="prize">${item.prize}</span>
+                    <div class="time">${item.time}</div>
+                `;
+                winnerList.appendChild(li);
+            });
+        }
+
+        // 创建火花效果
+        function createSparks() {
+            const machine = document.querySelector('.slot-machine');
+            const rect = machine.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            for (let i = 0; i < 30; i++) {
+                const spark = document.createElement('div');
+                spark.className = 'spark';
+                spark.style.left = `${centerX}px`;
+                spark.style.top = `${centerY}px`;
+                
+                // 随机方向
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 100 + 50;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+                
+                spark.style.setProperty('--tx', `${tx}px`);
+                spark.style.setProperty('--ty', `${ty}px`);
+                spark.style.animationDelay = `${Math.random() * 0.3}s`;
+                
+                document.body.appendChild(spark);
+                
+                // 动画结束后移除
+                setTimeout(() => {
+                    spark.remove();
+                }, 1000);
+            }
+        }
+
+        // 初始化
+        init();
+    </script>
+</body>
+</html>
