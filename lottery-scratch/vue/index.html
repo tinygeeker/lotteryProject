@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>刮刮乐抽奖 - Vue 版本</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+        header {
+            margin-bottom: 40px;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #e94560;
+            text-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+        }
+        .subtitle {
+            font-size: 1.1em;
+            color: rgba(255,255,255,0.8);
+        }
+        .lottery-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 40px 0;
+        }
+        .scratch-card {
+            position: relative;
+            width: 400px;
+            height: 200px;
+            background: linear-gradient(45deg, #e94560, #c71636);
+            border-radius: 15px;
+            margin-bottom: 40px;
+            box-shadow: 0 0 50px rgba(233, 69, 96, 0.3);
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .scratch-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #333, #666);
+            z-index: 2;
+            transition: opacity 0.3s ease;
+        }
+        .scratch-card.scratched::before {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .scratch-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+            padding: 20px;
+        }
+        .prize-title {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: white;
+            text-shadow: 0 0 20px rgba(255,255,255,0.5);
+        }
+        .prize-info {
+            font-size: 1.2em;
+            color: rgba(255,255,255,0.9);
+        }
+        .scratch-instructions {
+            font-size: 1.2em;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 20px;
+        }
+        .controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 40px 0;
+        }
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #e94560, #c71636);
+            color: white;
+            box-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+        }
+        .btn-primary:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(233, 69, 96, 0.8);
+        }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        .stats {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #e94560;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            font-size: 1em;
+            color: rgba(255,255,255,0.7);
+        }
+        .result-section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        .result-section h2 {
+            margin-bottom: 20px;
+            color: #e94560;
+        }
+        .winner-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+        .winner-item {
+            background: rgba(255,255,255,0.2);
+            padding: 15px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .winner-prize {
+            font-weight: bold;
+            color: #e94560;
+        }
+        .winner-name {
+            color: rgba(255,255,255,0.9);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.show {
+            display: flex;
+        }
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 60px 40px;
+            border-radius: 20px;
+            text-align: center;
+            border: 2px solid #e94560;
+            box-shadow: 0 0 50px rgba(233, 69, 96, 0.5);
+            min-width: 400px;
+        }
+        .modal-content h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #e94560;
+        }
+        .modal-prize {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: white;
+        }
+        .modal-winner {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            color: rgba(255,255,255,0.9);
+        }
+        .modal-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #e94560;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .modal-btn:hover {
+            background: #c71636;
+            transform: scale(1.05);
+        }
+        @keyframes scratch {
+            0% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 40px rgba(233, 69, 96, 0.8);
+            }
+            100% {
+                box-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+            }
+        }
+        footer {
+            margin-top: auto;
+            padding: 20px 0;
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9em;
+        }
+        @media (max-width: 600px) {
+            .scratch-card {
+                width: 300px;
+                height: 150px;
+            }
+            .prize-title {
+                font-size: 1.5em;
+            }
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            .btn {
+                width: 200px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="container">
+            <header>
+                <h1>🎫 刮刮乐抽奖</h1>
+                <p class="subtitle">用鼠标刮开涂层，查看中奖结果</p>
+            </header>
+            
+            <div class="lottery-container">
+                <div class="scratch-instructions">请用鼠标在下方卡片上刮一刮</div>
+                
+                <div class="scratch-card" :class="{ scratched: isScratched }" @mousedown="startScratching" @mouseup="stopScratching" @mousemove="scratch">
+                    <div class="scratch-content">
+                        <div class="prize-title">{{ prizeTitle }}</div>
+                        <div class="prize-info">{{ prizeInfo }}</div>
+                    </div>
+                </div>
+                
+                <div class="stats">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value">{{ config.prizes.length }}</div>
+                            <div class="stat-label">奖品数量</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">{{ config.participants.length }}</div>
+                            <div class="stat-label">参与人数</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">{{ winners.length }}</div>
+                            <div class="stat-label">中奖人数</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn btn-primary" @click="generateNewCard">新卡刮奖</button>
+                    <button class="btn btn-secondary" @click="resetLottery">重置抽奖</button>
+                    <button class="btn btn-secondary" @click="goBack">返回主页</button>
+                </div>
+            </div>
+            
+            <div class="result-section">
+                <h2>🏆 中奖记录</h2>
+                <div class="winner-list">
+                    <div v-for="(winner, index) in winners" :key="index" class="winner-item">
+                        <span class="winner-prize">{{ winner.prize }}</span>
+                        <span>→</span>
+                        <span class="winner-name">{{ winner.name }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 中奖结果模态框 -->
+        <div class="modal" :class="{ show: showModal }">
+            <div class="modal-content">
+                <h2>🎉 恭喜中奖！</h2>
+                <div class="modal-prize">{{ modalPrize }}</div>
+                <div class="modal-winner">{{ modalWinner }}</div>
+                <button class="modal-btn" @click="closeModal">确定</button>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2026 抽奖系统 | Vue 版本</p>
+        </footer>
+    </div>
+    
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                config: {
+                    prizes: [],
+                    participants: [],
+                    settings: {
+                        lotteryName: "刮刮乐抽奖",
+                        bgColor: "#1a1a2e",
+                        textColor: "#ffffff",
+                        buttonColor: "#e94560"
+                    }
+                },
+                winners: [],
+                isScratching: false,
+                isScratched: false,
+                currentPrize: null,
+                prizeTitle: '刮开查看',
+                prizeInfo: '奖品信息',
+                showModal: false,
+                modalPrize: '',
+                modalWinner: ''
+            },
+            mounted() {
+                this.loadConfig();
+            },
+            methods: {
+                // 加载配置
+                async loadConfig() {
+                    try {
+                        const response = await fetch('../../config/lottery_config.json');
+                        const data = await response.json();
+                        this.config = data;
+                        this.generateNewCard();
+                    } catch (error) {
+                        console.error('加载配置失败:', error);
+                        // 使用默认配置
+                        this.config.prizes = [
+                            { id: 1, title: '一等奖', image: '', count: 1, winner: '', probability: 5 },
+                            { id: 2, title: '二等奖', image: '', count: 2, winner: '', probability: 10 },
+                            { id: 3, title: '三等奖', image: '', count: 3, winner: '', probability: 15 },
+                            { id: 4, title: '四等奖', image: '', count: 5, winner: '', probability: 20 },
+                            { id: 5, title: '五等奖', image: '', count: 10, winner: '', probability: 50 }
+                        ];
+                        this.config.participants = ['张三', '李四', '王五', '赵六', '钱七', '孙八', '周九', '吴十'];
+                        this.generateNewCard();
+                    }
+                },
+                
+                // 生成新的刮刮乐卡片
+                generateNewCard() {
+                    this.isScratched = false;
+                    this.prizeTitle = '刮开查看';
+                    this.prizeInfo = '奖品信息';
+                    
+                    // 随机选择一个奖品
+                    this.currentPrize = this.selectRandomPrize();
+                },
+                
+                // 随机选择奖品
+                selectRandomPrize() {
+                    const prizes = this.config.prizes.filter(p => p.count > 0);
+                    if (prizes.length === 0) {
+                        return { title: '谢谢参与', count: 999, winner: '' };
+                    }
+                    
+                    // 根据概率选择奖品
+                    const totalProbability = prizes.reduce((sum, p) => sum + p.probability, 0);
+                    let random = Math.random() * totalProbability;
+                    
+                    for (const prize of prizes) {
+                        random -= prize.probability;
+                        if (random <= 0) {
+                            return prize;
+                        }
+                    }
+                    
+                    return prizes[0];
+                },
+                
+                // 开始刮擦
+                startScratching() {
+                    this.isScratching = true;
+                },
+                
+                // 停止刮擦
+                stopScratching() {
+                    this.isScratching = false;
+                },
+                
+                // 刮擦
+                scratch(e) {
+                    if (!this.isScratching) return;
+                    
+                    this.isScratched = true;
+                    
+                    // 显示中奖结果
+                    this.prizeTitle = this.currentPrize.title;
+                    this.prizeInfo = this.currentPrize.count > 0 ? `剩余: ${this.currentPrize.count}` : '已抽完';
+                    
+                    // 处理中奖
+                    if (this.currentPrize.count > 0) {
+                        // 减少奖品数量
+                        this.currentPrize.count--;
+                        
+                        // 确定中奖人
+                        let winnerName = this.currentPrize.winner;
+                        if (!winnerName && this.config.participants.length > 0) {
+                            const randomIndex = Math.floor(Math.random() * this.config.participants.length);
+                            winnerName = this.config.participants[randomIndex];
+                            // 从参与人员中移除中奖者
+                            this.config.participants.splice(randomIndex, 1);
+                        }
+                        
+                        // 记录中奖信息
+                        const winnerInfo = {
+                            prize: this.currentPrize.title,
+                            name: winnerName || '未知',
+                            time: new Date().toLocaleString()
+                        };
+                        this.winners.push(winnerInfo);
+                        
+                        // 显示中奖结果
+                        this.showResult(this.currentPrize.title, winnerName);
+                    }
+                },
+                
+                // 显示中奖结果
+                showResult(prize, winner) {
+                    this.modalPrize = `奖品：${prize}`;
+                    this.modalWinner = winner ? `中奖者：${winner}` : '参与奖';
+                    this.showModal = true;
+                },
+                
+                // 关闭模态框
+                closeModal() {
+                    this.showModal = false;
+                },
+                
+                // 重置抽奖
+                resetLottery() {
+                    if (confirm('确定要重置抽奖吗？中奖记录将被清空。')) {
+                        this.winners = [];
+                        // 恢复奖品数量
+                        this.config.prizes.forEach(prize => {
+                            prize.count = prize.id === 1 ? 1 : prize.id === 2 ? 2 : prize.id === 3 ? 3 : prize.id === 4 ? 5 : 10;
+                        });
+                        // 恢复参与人员
+                        this.config.participants = ['张三', '李四', '王五', '赵六', '钱七', '孙八', '周九', '吴十'];
+                        this.generateNewCard();
+                        alert('抽奖已重置');
+                    }
+                },
+                
+                // 返回主页
+                goBack() {
+                    location.href = '../../index.html';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

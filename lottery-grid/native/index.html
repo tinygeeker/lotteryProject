@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>九宫格抽奖 - 原生 JavaScript</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+        header {
+            margin-bottom: 40px;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #e94560;
+            text-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+        }
+        .subtitle {
+            font-size: 1.1em;
+            color: rgba(255,255,255,0.8);
+        }
+        .lottery-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 40px auto;
+            max-width: 600px;
+        }
+        .prize-cell {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255,255,255,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        .prize-cell:hover {
+            transform: scale(1.05);
+            border-color: #e94560;
+            box-shadow: 0 0 30px rgba(233, 69, 96, 0.3);
+        }
+        .prize-cell.active {
+            background: linear-gradient(45deg, #e94560, #c71636);
+            border-color: #e94560;
+            box-shadow: 0 0 40px rgba(233, 69, 96, 0.5);
+            animation: pulse 0.5s infinite;
+        }
+        .prize-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 15px;
+            border: 3px solid rgba(255,255,255,0.3);
+        }
+        .prize-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .prize-count {
+            font-size: 0.9em;
+            color: rgba(255,255,255,0.7);
+        }
+        .start-btn {
+            grid-column: 2;
+            grid-row: 2;
+            background: linear-gradient(45deg, #e94560, #c71636);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-size: 1.5em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(233, 69, 96, 0.5);
+        }
+        .start-btn:hover:not(:disabled) {
+            transform: scale(1.1);
+            box-shadow: 0 0 40px rgba(233, 69, 96, 0.7);
+        }
+        .start-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .start-btn .icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        .result-section {
+            margin-top: 40px;
+            padding: 30px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .result-section h2 {
+            margin-bottom: 20px;
+            color: #e94560;
+        }
+        .winner-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+        .winner-item {
+            background: rgba(255,255,255,0.2);
+            padding: 15px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .winner-prize {
+            font-weight: bold;
+            color: #e94560;
+        }
+        .winner-name {
+            color: rgba(255,255,255,0.9);
+        }
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background: #e94560;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #c71636;
+            transform: scale(1.05);
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 50px;
+            border-radius: 20px;
+            text-align: center;
+            border: 2px solid #e94560;
+            box-shadow: 0 0 50px rgba(233, 69, 96, 0.5);
+            min-width: 400px;
+        }
+        .modal-content h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #e94560;
+        }
+        .modal-prize {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: white;
+        }
+        .modal-winner {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            color: rgba(255,255,255,0.9);
+        }
+        .modal-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #e94560;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .modal-btn:hover {
+            background: #c71636;
+            transform: scale(1.05);
+        }
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 40px rgba(233, 69, 96, 0.8);
+            }
+            100% {
+                box-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+            }
+        }
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        .loading {
+            animation: spin 1s linear infinite;
+        }
+        footer {
+            margin-top: auto;
+            padding: 20px 0;
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎰 九宫格抽奖</h1>
+            <p class="subtitle">点击开始按钮，幸运指针将随机停在奖品格内</p>
+        </header>
+        
+        <div class="lottery-board" id="lotteryBoard">
+            <!-- 奖品格子将通过JavaScript动态生成 -->
+        </div>
+        
+        <div class="result-section">
+            <h2>🏆 中奖记录</h2>
+            <div class="winner-list" id="winnerList"></div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn btn-primary" onclick="resetLottery()">重置抽奖</button>
+            <button class="btn btn-secondary" onclick="location.href='../../index.html'">返回主页</button>
+        </div>
+    </div>
+    
+    <!-- 中奖结果模态框 -->
+    <div class="modal" id="resultModal">
+        <div class="modal-content">
+            <h2>🎉 恭喜中奖！</h2>
+            <div class="modal-prize" id="modalPrize"></div>
+            <div class="modal-winner" id="modalWinner"></div>
+            <button class="modal-btn" onclick="closeModal()">确定</button>
+        </div>
+    </div>
+    
+    <footer>
+        <p>© 2026 抽奖系统 | 原生 JavaScript 版本</p>
+    </footer>
+    
+    <script>
+        let config = {
+            prizes: [],
+            participants: [],
+            settings: {
+                lotteryName: "年会抽奖",
+                bgColor: "#1a1a2e",
+                textColor: "#ffffff",
+                buttonColor: "#e94560"
+            }
+        };
+        
+        let winners = [];
+        let isRunning = false;
+        let animationInterval = null;
+        let currentIndex = 0;
+        let prizeCells = [];
+        
+        // 加载配置
+        async function loadConfig() {
+            try {
+                const response = await fetch('../../config/lottery_config.json');
+                const data = await response.json();
+                config = data;
+                renderLotteryBoard();
+            } catch (error) {
+                console.error('加载配置失败:', error);
+                // 使用默认配置
+                config.prizes = [
+                    { id: 1, title: '一等奖', image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=luxury%20gift&image_size=square', count: 1, winner: '', probability: 5 },
+                    { id: 2, title: '二等奖', image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=gift%20package&image_size=square', count: 2, winner: '', probability: 10 },
+                    { id: 3, title: '三等奖', image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=gift%20box&image_size=square', count: 3, winner: '', probability: 15 },
+                    { id: 4, title: '四等奖', image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=gift%20card&image_size=square', count: 5, winner: '', probability: 20 },
+                    { id: 5, title: '五等奖', image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=small%20gift&image_size=square', count: 10, winner: '', probability: 50 }
+                ];
+                config.participants = ['张三', '李四', '王五', '赵六', '钱七', '孙八', '周九', '吴十', '郑一', '王二'];
+                renderLotteryBoard();
+            }
+        }
+        
+        // 渲染抽奖面板
+        function renderLotteryBoard() {
+            const board = document.getElementById('lotteryBoard');
+            board.innerHTML = '';
+            
+            // 生成奖品格子
+            const prizes = config.prizes;
+            prizeCells = [];
+            
+            // 确保有8个奖品格子（九宫格布局）
+            while (prizes.length < 8) {
+                prizes.push({
+                    id: prizes.length + 1,
+                    title: '谢谢参与',
+                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=thank%20you&image_size=square',
+                    count: 999,
+                    winner: '',
+                    probability: 0
+                });
+            }
+            
+            // 填充九宫格
+            const positions = [0, 1, 2, 5, 8, 7, 6, 3]; // 顺时针顺序
+            
+            for (let i = 0; i < 9; i++) {
+                if (i === 4) { // 中心位置
+                    const startBtn = document.createElement('button');
+                    startBtn.className = 'start-btn';
+                    startBtn.id = 'startBtn';
+                    startBtn.innerHTML = '<div class="icon">🎯</div>开始抽奖';
+                    startBtn.onclick = startLottery;
+                    board.appendChild(startBtn);
+                } else {
+                    const prizeIndex = positions.indexOf(i);
+                    const prize = prizes[prizeIndex % prizes.length];
+                    
+                    const cell = document.createElement('div');
+                    cell.className = 'prize-cell';
+                    cell.dataset.prizeId = prize.id;
+                    cell.innerHTML = `
+                        <img src="${prize.image}" alt="${prize.title}" class="prize-image">
+                        <div class="prize-title">${prize.title}</div>
+                        <div class="prize-count">剩余: ${prize.count}</div>
+                    `;
+                    board.appendChild(cell);
+                    prizeCells.push(cell);
+                }
+            }
+        }
+        
+        // 开始抽奖
+        function startLottery() {
+            if (isRunning) return;
+            
+            isRunning = true;
+            const startBtn = document.getElementById('startBtn');
+            startBtn.disabled = true;
+            startBtn.innerHTML = '<div class="icon loading">🔄</div>抽奖中...';
+            
+            currentIndex = 0;
+            let speed = 100;
+            let acceleration = 0;
+            
+            // 开始动画
+            animationInterval = setInterval(() => {
+                // 移除所有活动状态
+                prizeCells.forEach(cell => cell.classList.remove('active'));
+                
+                // 添加当前活动状态
+                prizeCells[currentIndex].classList.add('active');
+                
+                // 更新索引
+                currentIndex = (currentIndex + 1) % prizeCells.length;
+                
+                // 加速阶段
+                if (acceleration < 10) {
+                    acceleration++;
+                    if (speed > 50) {
+                        speed -= 5;
+                    }
+                } 
+                // 减速阶段
+                else if (acceleration > 20) {
+                    speed += 10;
+                    if (speed > 200) {
+                        clearInterval(animationInterval);
+                        determineWinner();
+                    }
+                }
+                
+                acceleration++;
+            }, speed);
+        }
+        
+        // 确定中奖者
+        function determineWinner() {
+            const startBtn = document.getElementById('startBtn');
+            startBtn.disabled = false;
+            startBtn.innerHTML = '<div class="icon">🎯</div>开始抽奖';
+            
+            // 计算中奖概率
+            const prizeElements = Array.from(document.querySelectorAll('.prize-cell'));
+            const winnerIndex = Math.floor(Math.random() * prizeElements.length);
+            const winnerCell = prizeElements[winnerIndex];
+            const prizeId = parseInt(winnerCell.dataset.prizeId);
+            
+            // 找到对应的奖品
+            const prize = config.prizes.find(p => p.id === prizeId);
+            
+            if (!prize) {
+                showResult('谢谢参与', '');
+                isRunning = false;
+                return;
+            }
+            
+            // 检查奖品是否还有剩余
+            if (prize.count <= 0) {
+                showResult('奖品已抽完', '');
+                isRunning = false;
+                return;
+            }
+            
+            // 减少奖品数量
+            prize.count--;
+            
+            // 确定中奖人
+            let winnerName = prize.winner;
+            if (!winnerName && config.participants.length > 0) {
+                const randomIndex = Math.floor(Math.random() * config.participants.length);
+                winnerName = config.participants[randomIndex];
+                // 从参与人员中移除中奖者
+                config.participants.splice(randomIndex, 1);
+            }
+            
+            // 记录中奖信息
+            const winnerInfo = {
+                prize: prize.title,
+                name: winnerName || '未知',
+                time: new Date().toLocaleString()
+            };
+            winners.push(winnerInfo);
+            
+            // 更新奖品数量显示
+            const countElement = winnerCell.querySelector('.prize-count');
+            if (countElement) {
+                countElement.textContent = `剩余: ${prize.count}`;
+            }
+            
+            // 显示中奖结果
+            showResult(prize.title, winnerName);
+            
+            // 更新中奖记录
+            updateWinnerList();
+            
+            isRunning = false;
+        }
+        
+        // 显示中奖结果
+        function showResult(prize, winner) {
+            const modal = document.getElementById('resultModal');
+            const modalPrize = document.getElementById('modalPrize');
+            const modalWinner = document.getElementById('modalWinner');
+            
+            modalPrize.textContent = `奖品：${prize}`;
+            modalWinner.textContent = winner ? `中奖者：${winner}` : '参与奖';
+            
+            modal.style.display = 'block';
+        }
+        
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('resultModal').style.display = 'none';
+        }
+        
+        // 更新中奖记录
+        function updateWinnerList() {
+            const list = document.getElementById('winnerList');
+            list.innerHTML = '';
+            
+            winners.forEach((winner, index) => {
+                const item = document.createElement('div');
+                item.className = 'winner-item';
+                item.innerHTML = `
+                    <span class="winner-prize">${winner.prize}</span>
+                    <span>→</span>
+                    <span class="winner-name">${winner.name}</span>
+                `;
+                list.appendChild(item);
+            });
+        }
+        
+        // 重置抽奖
+        function resetLottery() {
+            if (confirm('确定要重置抽奖吗？中奖记录将被清空。')) {
+                winners = [];
+                // 重新加载配置
+                loadConfig();
+                // 清空中奖记录
+                updateWinnerList();
+                alert('抽奖已重置');
+            }
+        }
+        
+        // 初始化
+        window.onload = function() {
+            loadConfig();
+        };
+        
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const modal = document.getElementById('resultModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>砸金蛋抽奖 - 原生JavaScript</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #e63946;
+            margin-bottom: 30px;
+        }
+
+        .eggs-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin: 50px 0;
+        }
+
+        .egg {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .egg:hover {
+            transform: scale(1.05);
+        }
+
+        .egg-image {
+            width: 150px;
+            height: 180px;
+            background-color: #ffd700;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            position: relative;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #8b4513;
+        }
+
+        .egg-number {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 36px;
+            font-weight: bold;
+            color: rgba(139, 69, 19, 0.3);
+        }
+
+        .crack-animation {
+            animation: crack 1s ease-out forwards;
+        }
+
+        @keyframes crack {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+                background-color: #ffed4e;
+            }
+        }
+
+        .result-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .result-content {
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .result-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e63946;
+            margin-bottom: 20px;
+        }
+
+        .result-prize {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2a9d8f;
+            margin: 20px 0;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #e63946;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            background-color: #c1121f;
+        }
+
+        .btn-secondary {
+            background-color: #457b9d;
+        }
+
+        .btn-secondary:hover {
+            background-color: #1d3557;
+        }
+
+        .control-panel {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .remaining-eggs {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #457b9d;
+        }
+
+        @media (max-width: 768px) {
+            .eggs-container {
+                gap: 20px;
+            }
+
+            .egg-image {
+                width: 120px;
+                height: 150px;
+            }
+
+            .egg-number {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>砸金蛋抽奖</h1>
+        
+        <div class="control-panel">
+            <div class="remaining-eggs">剩余金蛋: <span id="remaining-count">6</span></div>
+            <button class="btn" id="reset-btn">重置抽奖</button>
+            <button class="btn btn-secondary" onclick="window.location.href='../../index.html'">返回主页</button>
+        </div>
+
+        <div class="eggs-container" id="eggs-container">
+            <!-- 金蛋将通过JavaScript动态生成 -->
+        </div>
+    </div>
+
+    <div class="result-modal" id="result-modal">
+        <div class="result-content">
+            <div class="result-title">恭喜中奖！</div>
+            <div class="result-prize" id="result-prize"></div>
+            <button class="btn" id="close-modal">确定</button>
+        </div>
+    </div>
+
+    <script>
+        let configData = {};
+        let availableEggs = 6;
+        let crackedEggs = [];
+        let prizes = [];
+
+        // 加载配置数据
+        async function loadConfig() {
+            try {
+                const response = await fetch('../../config/lottery_config.json');
+                configData = await response.json();
+                prizes = configData.prizes;
+                initEggs();
+            } catch (error) {
+                console.error('加载配置失败:', error);
+                alert('加载配置失败，请刷新页面重试');
+            }
+        }
+
+        // 初始化金蛋
+        function initEggs() {
+            const container = document.getElementById('eggs-container');
+            container.innerHTML = '';
+            
+            for (let i = 1; i <= availableEggs; i++) {
+                const egg = document.createElement('div');
+                egg.className = 'egg';
+                egg.dataset.eggId = i;
+                
+                egg.innerHTML = `
+                    <div class="egg-image">
+                        <div class="egg-number">${i}</div>
+                    </div>
+                `;
+                
+                egg.addEventListener('click', () => crackEgg(i));
+                container.appendChild(egg);
+            }
+            
+            document.getElementById('remaining-count').textContent = availableEggs - crackedEggs.length;
+        }
+
+        // 砸金蛋
+        function crackEgg(eggId) {
+            if (crackedEggs.includes(eggId)) {
+                return;
+            }
+            
+            const eggElement = document.querySelector(`.egg[data-egg-id="${eggId}"]`);
+            const eggImage = eggElement.querySelector('.egg-image');
+            
+            // 添加破裂动画
+            eggImage.classList.add('crack-animation');
+            
+            // 模拟砸蛋过程
+            setTimeout(() => {
+                const prize = getRandomPrize();
+                showResult(prize);
+                crackedEggs.push(eggId);
+                document.getElementById('remaining-count').textContent = availableEggs - crackedEggs.length;
+            }, 1000);
+        }
+
+        // 获取随机奖品
+        function getRandomPrize() {
+            if (prizes.length === 0) {
+                return { title: '谢谢参与', description: '很遗憾，没有中奖' };
+            }
+            
+            // 计算总概率
+            const totalProbability = prizes.reduce((sum, prize) => sum + (prize.probability || 1), 0);
+            let random = Math.random() * totalProbability;
+            
+            for (const prize of prizes) {
+                random -= (prize.probability || 1);
+                if (random <= 0) {
+                    // 减少奖品数量
+                    if (prize.quantity > 0) {
+                        prize.quantity--;
+                    }
+                    // 如果奖品数量为0，从数组中移除
+                    if (prize.quantity === 0) {
+                        const index = prizes.indexOf(prize);
+                        if (index > -1) {
+                            prizes.splice(index, 1);
+                        }
+                    }
+                    return prize;
+                }
+            }
+            
+            return prizes[0];
+        }
+
+        // 显示结果
+        function showResult(prize) {
+            document.getElementById('result-prize').textContent = prize.title;
+            document.getElementById('result-modal').style.display = 'flex';
+        }
+
+        // 重置抽奖
+        function resetLottery() {
+            crackedEggs = [];
+            loadConfig();
+        }
+
+        // 关闭模态框
+        document.getElementById('close-modal').addEventListener('click', () => {
+            document.getElementById('result-modal').style.display = 'none';
+        });
+
+        // 重置按钮事件
+        document.getElementById('reset-btn').addEventListener('click', resetLottery);
+
+        // 点击模态框外部关闭
+        document.getElementById('result-modal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('result-modal')) {
+                document.getElementById('result-modal').style.display = 'none';
+            }
+        });
+
+        // 初始化
+        loadConfig();
+    </script>
+</body>
+</html>

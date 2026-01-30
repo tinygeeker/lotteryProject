@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>转盘抽奖 - 原生 JavaScript</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            text-align: center;
+        }
+        header {
+            margin-bottom: 40px;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #e94560;
+            text-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+        }
+        .subtitle {
+            font-size: 1.1em;
+            color: rgba(255,255,255,0.8);
+        }
+        .lottery-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 40px 0;
+        }
+        .wheel-wrapper {
+            position: relative;
+            margin-bottom: 40px;
+        }
+        .wheel {
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            border: 8px solid #333;
+            box-shadow: 0 0 50px rgba(233, 69, 96, 0.3);
+            transition: transform 3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .wheel.spinning {
+            animation: spin 3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .prize-sector {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 50%;
+            height: 100%;
+            transform-origin: left center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .prize-sector:hover {
+            filter: brightness(1.2);
+        }
+        .prize-sector.even {
+            background: linear-gradient(90deg, #e94560, #c71636);
+        }
+        .prize-sector.odd {
+            background: linear-gradient(90deg, #0f3460, #16213e);
+        }
+        .prize-info {
+            transform: rotate(180deg);
+            padding: 20px;
+            text-align: center;
+        }
+        .prize-title {
+            font-size: 1.2em;
+            margin-bottom: 5px;
+        }
+        .prize-count {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        .wheel-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #e94560, #c71636);
+            border: 4px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            box-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+            transition: all 0.3s ease;
+        }
+        .wheel-center:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 0 0 30px rgba(233, 69, 96, 0.8);
+        }
+        .wheel-center::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 20px solid #e94560;
+        }
+        .controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 40px 0;
+        }
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #e94560, #c71636);
+            color: white;
+            box-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+        }
+        .btn-primary:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(233, 69, 96, 0.8);
+        }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        .stats {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #e94560;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            font-size: 1em;
+            color: rgba(255,255,255,0.7);
+        }
+        .result-section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        .result-section h2 {
+            margin-bottom: 20px;
+            color: #e94560;
+        }
+        .winner-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+        .winner-item {
+            background: rgba(255,255,255,0.2);
+            padding: 15px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .winner-prize {
+            font-weight: bold;
+            color: #e94560;
+        }
+        .winner-name {
+            color: rgba(255,255,255,0.9);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.show {
+            display: flex;
+        }
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 60px 40px;
+            border-radius: 20px;
+            text-align: center;
+            border: 2px solid #e94560;
+            box-shadow: 0 0 50px rgba(233, 69, 96, 0.5);
+            min-width: 400px;
+        }
+        .modal-content h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #e94560;
+        }
+        .modal-prize {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: white;
+        }
+        .modal-winner {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            color: rgba(255,255,255,0.9);
+        }
+        .modal-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #e94560;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .modal-btn:hover {
+            background: #c71636;
+            transform: scale(1.05);
+        }
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(3600deg); /* 多转几圈增加视觉效果 */
+            }
+        }
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 40px rgba(233, 69, 96, 0.8);
+            }
+            100% {
+                box-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+            }
+        }
+        footer {
+            margin-top: auto;
+            padding: 20px 0;
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9em;
+        }
+        @media (max-width: 600px) {
+            .wheel {
+                width: 300px;
+                height: 300px;
+            }
+            .wheel-center {
+                width: 80px;
+                height: 80px;
+            }
+            .prize-title {
+                font-size: 0.9em;
+            }
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            .btn {
+                width: 200px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎡 转盘抽奖</h1>
+            <p class="subtitle">点击中心按钮，转盘旋转后停在哪个区域就获得对应奖品</p>
+        </header>
+        
+        <div class="lottery-container">
+            <div class="wheel-wrapper">
+                <div class="wheel" id="wheel">
+                    <!-- 奖品扇形将通过JavaScript动态生成 -->
+                </div>
+                <div class="wheel-center" id="wheelCenter" onclick="spinWheel()"></div>
+            </div>
+            
+            <div class="stats">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="prizeCount">0</div>
+                        <div class="stat-label">奖品数量</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="participantCount">0</div>
+                        <div class="stat-label">参与人数</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="winnerCount">0</div>
+                        <div class="stat-label">中奖人数</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="spinBtn" onclick="spinWheel()">开始抽奖</button>
+                <button class="btn btn-secondary" onclick="resetLottery()">重置抽奖</button>
+                <button class="btn btn-secondary" onclick="location.href='../../index.html'">返回主页</button>
+            </div>
+        </div>
+        
+        <div class="result-section">
+            <h2>🏆 中奖记录</h2>
+            <div class="winner-list" id="winnerList"></div>
+        </div>
+    </div>
+    
+    <!-- 中奖结果模态框 -->
+    <div class="modal" id="resultModal">
+        <div class="modal-content">
+            <h2>🎉 恭喜中奖！</h2>
+            <div class="modal-prize" id="modalPrize"></div>
+            <div class="modal-winner" id="modalWinner"></div>
+            <button class="modal-btn" onclick="closeModal()">确定</button>
+        </div>
+    </div>
+    
+    <footer>
+        <p>© 2026 抽奖系统 | 原生 JavaScript 版本</p>
+    </footer>
+    
+    <script>
+        let config = {
+            prizes: [],
+            participants: [],
+            settings: {
+                lotteryName: "转盘抽奖",
+                bgColor: "#1a1a2e",
+                textColor: "#ffffff",
+                buttonColor: "#e94560"
+            }
+        };
+        
+        let winners = [];
+        let isSpinning = false;
+        let currentRotation = 0;
+        let prizeAngles = [];
+        
+        // 加载配置
+        async function loadConfig() {
+            try {
+                const response = await fetch('../../config/lottery_config.json');
+                const data = await response.json();
+                config = data;
+                initWheel();
+            } catch (error) {
+                console.error('加载配置失败:', error);
+                // 使用默认配置
+                config.prizes = [
+                    { id: 1, title: '一等奖', image: '', count: 1, winner: '', probability: 5 },
+                    { id: 2, title: '二等奖', image: '', count: 2, winner: '', probability: 10 },
+                    { id: 3, title: '三等奖', image: '', count: 3, winner: '', probability: 15 },
+                    { id: 4, title: '四等奖', image: '', count: 5, winner: '', probability: 20 },
+                    { id: 5, title: '五等奖', image: '', count: 10, winner: '', probability: 50 }
+                ];
+                config.participants = ['张三', '李四', '王五', '赵六', '钱七', '孙八', '周九', '吴十'];
+                initWheel();
+            }
+        }
+        
+        // 初始化转盘
+        function initWheel() {
+            const wheel = document.getElementById('wheel');
+            wheel.innerHTML = '';
+            
+            const prizes = config.prizes;
+            const sectorCount = prizes.length;
+            const anglePerSector = 360 / sectorCount;
+            
+            prizeAngles = [];
+            
+            prizes.forEach((prize, index) => {
+                const sector = document.createElement('div');
+                sector.className = `prize-sector ${index % 2 === 0 ? 'even' : 'odd'}`;
+                sector.style.transform = `rotate(${index * anglePerSector}deg)`;
+                sector.innerHTML = `
+                    <div class="prize-info">
+                        <div class="prize-title">${prize.title}</div>
+                        <div class="prize-count">${prize.count}</div>
+                    </div>
+                `;
+                wheel.appendChild(sector);
+                
+                // 记录每个奖品的角度范围
+                prizeAngles.push({
+                    prize,
+                    startAngle: index * anglePerSector,
+                    endAngle: (index + 1) * anglePerSector
+                });
+            });
+            
+            updateStats();
+            updateWinnerList();
+        }
+        
+        // 更新统计信息
+        function updateStats() {
+            document.getElementById('prizeCount').textContent = config.prizes.length;
+            document.getElementById('participantCount').textContent = config.participants.length;
+            document.getElementById('winnerCount').textContent = winners.length;
+        }
+        
+        // 旋转转盘
+        function spinWheel() {
+            if (isSpinning) return;
+            
+            isSpinning = true;
+            const wheel = document.getElementById('wheel');
+            
+            // 随机选择一个奖品
+            const randomIndex = Math.floor(Math.random() * config.prizes.length);
+            const selectedPrize = config.prizes[randomIndex];
+            
+            // 计算旋转角度（多转几圈 + 目标位置）
+            const anglePerSector = 360 / config.prizes.length;
+            const targetAngle = 3600 + (360 - (randomIndex * anglePerSector + anglePerSector / 2));
+            
+            // 添加旋转动画
+            wheel.style.transform = `rotate(0deg)`;
+            setTimeout(() => {
+                wheel.style.transform = `rotate(${targetAngle}deg)`;
+            }, 100);
+            
+            // 旋转结束后处理结果
+            setTimeout(() => {
+                handleSpinResult(selectedPrize);
+            }, 3000);
+        }
+        
+        // 处理旋转结果
+        function handleSpinResult(prize) {
+            isSpinning = false;
+            
+            // 检查奖品是否还有剩余
+            if (prize.count <= 0) {
+                showResult('谢谢参与', '奖品已抽完');
+                return;
+            }
+            
+            // 减少奖品数量
+            prize.count--;
+            
+            // 确定中奖人
+            let winnerName = prize.winner;
+            if (!winnerName && config.participants.length > 0) {
+                const randomIndex = Math.floor(Math.random() * config.participants.length);
+                winnerName = config.participants[randomIndex];
+                // 从参与人员中移除中奖者
+                config.participants.splice(randomIndex, 1);
+            }
+            
+            // 记录中奖信息
+            const winnerInfo = {
+                prize: prize.title,
+                name: winnerName || '未知',
+                time: new Date().toLocaleString()
+            };
+            winners.push(winnerInfo);
+            
+            // 更新显示
+            initWheel(); // 重新渲染转盘以更新奖品数量
+            updateWinnerList();
+            
+            // 显示中奖结果
+            showResult(prize.title, winnerName);
+        }
+        
+        // 显示中奖结果
+        function showResult(prize, winner) {
+            document.getElementById('modalPrize').textContent = `奖品：${prize}`;
+            document.getElementById('modalWinner').textContent = winner ? `中奖者：${winner}` : '参与奖';
+            document.getElementById('resultModal').classList.add('show');
+        }
+        
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('resultModal').classList.remove('show');
+        }
+        
+        // 更新中奖记录
+        function updateWinnerList() {
+            const list = document.getElementById('winnerList');
+            list.innerHTML = '';
+            
+            winners.forEach((winner, index) => {
+                const item = document.createElement('div');
+                item.className = 'winner-item';
+                item.innerHTML = `
+                    <span class="winner-prize">${winner.prize}</span>
+                    <span>→</span>
+                    <span class="winner-name">${winner.name}</span>
+                `;
+                list.appendChild(item);
+            });
+        }
+        
+        // 重置抽奖
+        function resetLottery() {
+            if (confirm('确定要重置抽奖吗？中奖记录将被清空。')) {
+                winners = [];
+                // 恢复奖品数量（这里简化处理，实际应该从配置重新加载）
+                config.prizes.forEach(prize => {
+                    prize.count = prize.id === 1 ? 1 : prize.id === 2 ? 2 : prize.id === 3 ? 3 : prize.id === 4 ? 5 : 10;
+                });
+                // 恢复参与人员
+                config.participants = ['张三', '李四', '王五', '赵六', '钱七', '孙八', '周九', '吴十'];
+                initWheel();
+                updateWinnerList();
+                alert('抽奖已重置');
+            }
+        }
+        
+        // 初始化
+        window.onload = function() {
+            loadConfig();
+        };
+    </script>
+</body>
+</html>

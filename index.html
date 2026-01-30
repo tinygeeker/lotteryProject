@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抽奖系统 - 主页</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 30px 0;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            color: #e94560;
+            text-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+        }
+        .subtitle {
+            font-size: 1.2em;
+            color: rgba(255,255,255,0.8);
+        }
+        .lottery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        .lottery-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .lottery-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border-color: #e94560;
+        }
+        .lottery-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #e94560, #c71636);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            box-shadow: 0 0 30px rgba(233, 69, 96, 0.5);
+        }
+        h2 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: white;
+        }
+        p {
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 25px;
+        }
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary {
+            background: #e94560;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #c71636;
+            transform: scale(1.05);
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        .config-section {
+            text-align: center;
+            margin-top: 50px;
+            padding: 30px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        .config-section h2 {
+            margin-bottom: 20px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px 0;
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 抽奖系统</h1>
+            <p class="subtitle">年会抽奖 | 活动抽奖 | 幸运抽奖</p>
+        </header>
+        
+        <div class="lottery-grid">
+            <!-- 九宫格抽奖 -->
+            <div class="lottery-card">
+                <div class="lottery-icon">🎰</div>
+                <h2>九宫格抽奖</h2>
+                <p>经典的九宫格抽奖方式，点击开始按钮，指针随机停在奖品格内</p>
+                <div class="button-group">
+                    <a href="lottery-grid/native/index.html" class="btn btn-primary">原生 JavaScript</a>
+                    <a href="lottery-grid/vue/index.html" class="btn btn-secondary">Vue 版本</a>
+                </div>
+            </div>
+            
+            <!-- 年会大屏抽奖 -->
+            <div class="lottery-card">
+                <div class="lottery-icon">📺</div>
+                <h2>年会大屏抽奖</h2>
+                <p>适合年会等大型活动的大屏抽奖，支持滚动显示参与人员</p>
+                <div class="button-group">
+                    <a href="lottery-screen/native/index.html" class="btn btn-primary">原生 JavaScript</a>
+                    <a href="lottery-screen/vue/index.html" class="btn btn-secondary">Vue 版本</a>
+                </div>
+            </div>
+            
+            <!-- 转盘抽奖 -->
+            <div class="lottery-card">
+                <div class="lottery-icon">🎡</div>
+                <h2>转盘抽奖</h2>
+                <p>传统的转盘抽奖，指针旋转后停在对应奖品区域</p>
+                <div class="button-group">
+                    <a href="lottery-wheel/native/index.html" class="btn btn-primary">原生 JavaScript</a>
+                    <a href="lottery-wheel/vue/index.html" class="btn btn-secondary">Vue 版本</a>
+                </div>
+            </div>
+            
+            <!-- 刮刮乐抽奖 -->
+            <div class="lottery-card">
+                <div class="lottery-icon">🎫</div>
+                <h2>刮刮乐抽奖</h2>
+                <p>模拟刮刮乐彩票的抽奖方式，用鼠标刮开涂层查看中奖结果</p>
+                <div class="button-group">
+                    <a href="lottery-scratch/native/index.html" class="btn btn-primary">原生 JavaScript</a>
+                    <a href="lottery-scratch/vue/index.html" class="btn btn-secondary">Vue 版本</a>
+                </div>
+            </div>
+            
+            <!-- 砸金蛋抽奖 -->
+            <div class="lottery-card">
+                <div class="lottery-icon">🥚</div>
+                <h2>砸金蛋抽奖</h2>
+                <p>点击金蛋砸开，查看是否中奖，支持动画效果</p>
+                <div class="button-group">
+                    <a href="lottery-egg/native/index.html" class="btn btn-primary">原生 JavaScript</a>
+                    <a href="lottery-egg/vue/index.html" class="btn btn-secondary">Vue 版本</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="config-section">
+            <h2>⚙️ 配置管理</h2>
+            <p>统一管理所有抽奖的奖品配置、参与人员和系统设置</p>
+            <a href="config/index.html" class="btn btn-primary">进入配置页面</a>
+        </div>
+        
+        <footer>
+            <p>© 2026 抽奖系统 | 设计与开发</p>
+        </footer>
+    </div>
+</body>
+</html>
