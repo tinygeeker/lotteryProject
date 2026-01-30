@@ -183,27 +183,196 @@
             }
         }
 
+        .egg-opened {
+            position: relative;
+            animation: eggOpen 0.8s ease-out forwards;
+        }
+
+        .egg-opened::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at center, rgba(255, 215, 0, 0.3) 0%, rgba(255, 152, 0, 0.2) 70%),
+                linear-gradient(45deg, transparent 48%, rgba(0, 0, 0, 0.4) 49%, rgba(0, 0, 0, 0.4) 51%, transparent 52%),
+                linear-gradient(-45deg, transparent 48%, rgba(0, 0, 0, 0.4) 49%, rgba(0, 0, 0, 0.4) 51%, transparent 52%),
+                linear-gradient(90deg, transparent 48%, rgba(0, 0, 0, 0.4) 49%, rgba(0, 0, 0, 0.4) 51%, transparent 52%);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            pointer-events: none;
+        }
+
+        .egg-opened::after {
+            content: '';
+            position: absolute;
+            top: 20%;
+            left: 20%;
+            right: 20%;
+            bottom: 20%;
+            background: 
+                linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%),
+                radial-gradient(circle at center, rgba(255, 215, 0, 0.5) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: eggGlow 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes eggOpen {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            30% {
+                transform: scale(1.1);
+                opacity: 0.9;
+                box-shadow: 0 15px 30px rgba(255, 215, 0, 0.6);
+            }
+            60% {
+                transform: scale(1.05);
+                opacity: 0.85;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0.8;
+                background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+                box-shadow: 0 8px 20px rgba(255, 152, 0, 0.4);
+            }
+        }
+
+        @keyframes eggGlow {
+            0% {
+                opacity: 0.5;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0.8;
+                transform: scale(1.1);
+            }
+        }
+
+        .egg-sparks {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .spark {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #fbbf24;
+            border-radius: 50%;
+            animation: spark 1s ease-out forwards;
+            box-shadow: 0 0 10px #fbbf24, 0 0 20px #fbbf24;
+        }
+
+        @keyframes spark {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0) translate(var(--tx), var(--ty));
+                opacity: 0;
+            }
+        }
+
         .hammer {
             position: absolute;
-            width: 40px;
+            width: 22px;
             height: 120px;
-            background: linear-gradient(135deg, #8b4513 0%, #a0522d 100%);
-            border-radius: 5px;
+            background: 
+                linear-gradient(90deg, 
+                    rgba(139, 69, 19, 0.8) 0%, 
+                    rgba(160, 82, 45, 0.9) 50%, 
+                    rgba(139, 69, 19, 0.8) 100%
+                ),
+                repeating-linear-gradient(
+                    90deg, 
+                    rgba(255, 255, 255, 0.1) 0px, 
+                    rgba(255, 255, 255, 0.05) 2px, 
+                    rgba(255, 255, 255, 0.1) 4px
+                );
+            border-radius: 4px 4px 10px 10px;
             transform-origin: bottom center;
             pointer-events: none;
             z-index: 100;
             display: none;
+            box-shadow: 
+                0 4px 12px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.3);
         }
 
         .hammer::before {
             content: '';
             position: absolute;
-            top: -10px;
-            left: -10px;
-            width: 60px;
+            top: -30px;
+            left: -30px;
+            width: 75px;
+            height: 40px;
+            background: 
+                linear-gradient(135deg, 
+                    #c9a063 0%, 
+                    #e6c274 50%, 
+                    #c9a063 100%
+                ),
+                repeating-linear-gradient(
+                    45deg, 
+                    rgba(255, 255, 255, 0.1) 0px, 
+                    rgba(255, 255, 255, 0.05) 3px, 
+                    rgba(255, 255, 255, 0.1) 6px
+                );
+            border-radius: 10px 10px 14px 14px;
+            box-shadow: 
+                0 4px 12px rgba(0, 0, 0, 0.5),
+                inset 0 2px 0 rgba(255, 255, 255, 0.3),
+                inset 0 -2px 0 rgba(0, 0, 0, 0.4);
+        }
+
+        .hammer::after {
+            content: '';
+            position: absolute;
+            top: -25px;
+            left: -25px;
+            width: 65px;
             height: 30px;
-            background: linear-gradient(135deg, #a0522d 0%, #cd853f 100%);
-            border-radius: 5px;
+            background: 
+                linear-gradient(135deg, 
+                    #ffd700 0%, 
+                    #ffed4e 50%, 
+                    #ffd700 100%
+                );
+            border-radius: 8px 8px 12px 12px;
+            box-shadow: 
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .hammer-handle-band {
+            position: absolute;
+            bottom: 20px;
+            left: -3px;
+            right: -3px;
+            height: 10px;
+            background: linear-gradient(90deg, #b8860b 0%, #daa520 50%, #b8860b 100%);
+            border-radius: 4px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .hammer-handle-end {
+            position: absolute;
+            bottom: -5px;
+            left: -5px;
+            right: -5px;
+            height: 15px;
+            background: linear-gradient(90deg, #8b4513 0%, #a0522d 50%, #8b4513 100%);
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
 
         .hammer-animation {
@@ -214,8 +383,14 @@
             0% {
                 transform: rotate(0deg) scale(1);
             }
+            20% {
+                transform: rotate(-20deg) scale(1.05);
+            }
             50% {
-                transform: rotate(-60deg) scale(1.1);
+                transform: rotate(-80deg) scale(1.15);
+            }
+            70% {
+                transform: rotate(-40deg) scale(1.1);
             }
             100% {
                 transform: rotate(0deg) scale(1);
@@ -489,7 +664,10 @@
         </div>
     </div>
 
-    <div class="hammer" id="hammer"></div>
+    <div class="hammer" id="hammer">
+        <div class="hammer-handle-band"></div>
+        <div class="hammer-handle-end"></div>
+    </div>
 
     <script>
         let configData = {};
@@ -550,8 +728,8 @@
             // 显示锤子并添加动画
             const hammer = document.getElementById('hammer');
             hammer.style.display = 'block';
-            hammer.style.left = `${clientX - 20}px`;
-            hammer.style.top = `${clientY - 60}px`;
+            hammer.style.left = `${clientX - 10}px`;
+            hammer.style.top = `${clientY - 50}px`;
             hammer.style.zIndex = '1000';
             
             // 重置锤子动画
@@ -572,6 +750,12 @@
                 addToWinnerHistory(prize);
                 crackedEggs.push(eggId);
                 document.getElementById('remaining-count').textContent = availableEggs - crackedEggs.length;
+                
+                // 添加打开的样式
+                eggImage.classList.add('egg-opened');
+                
+                // 创建火花效果
+                createSparks(eggRect.left + eggRect.width / 2, eggRect.top + eggRect.height / 2);
                 
                 // 隐藏锤子
                 setTimeout(() => {
@@ -675,6 +859,33 @@
                 document.getElementById('result-modal').style.display = 'none';
             }
         });
+
+        // 创建火花效果
+        function createSparks(x, y) {
+            for (let i = 0; i < 20; i++) {
+                const spark = document.createElement('div');
+                spark.className = 'spark';
+                spark.style.left = `${x}px`;
+                spark.style.top = `${y}px`;
+                
+                // 随机方向和距离
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 100 + 50;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+                
+                spark.style.setProperty('--tx', `${tx}px`);
+                spark.style.setProperty('--ty', `${ty}px`);
+                spark.style.animationDelay = `${Math.random() * 0.3}s`;
+                
+                document.body.appendChild(spark);
+                
+                // 动画结束后移除
+                setTimeout(() => {
+                    spark.remove();
+                }, 1000);
+            }
+        }
 
         // 初始化
         loadConfig();

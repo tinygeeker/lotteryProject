@@ -221,12 +221,25 @@
         .wheel-center::before {
             content: '';
             position: absolute;
-            top: -20px;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-bottom: 25px solid #00f0ff;
+            box-shadow: 0 0 15px #00f0ff, 0 0 25px rgba(0, 240, 255, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        .wheel-center::after {
+            content: '';
+            position: absolute;
+            top: -25px;
             left: 50%;
             transform: translateX(-50%);
             border-left: 15px solid transparent;
             border-right: 15px solid transparent;
-            border-bottom: 20px solid #00f0ff;
+            border-bottom: 20px solid #00a3ff;
         }
         .stats {
             background: rgba(255, 255, 255, 0.05);
@@ -595,7 +608,7 @@
     
     <footer>
         <p>© 2026 <span class="footer-tech">智能抽奖系统</span> | 原生 JavaScript 版本</p>
-        <p style="margin-top: 5px; font-size: 0.9em;">Powered by <span class="footer-tech">Modern Web Technologies</span></p>
+        <p style="margin-top: 5px; font-size: 0.9em;">Powered by <a href="https://github.com/tinygeeker" target="_blank" class="footer-tech">tinygeeker</a></p>
     </footer>
     
     <script>

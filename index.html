@@ -109,14 +109,14 @@
         }
         .lottery-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 35px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
             margin-bottom: 60px;
         }
         .lottery-card {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 20px;
-            padding: 35px;
+            padding: 25px;
             text-align: center;
             backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -145,15 +145,15 @@
             transform: scaleX(1);
         }
         .lottery-icon {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 25px;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
             border-radius: 50%;
             background: linear-gradient(45deg, #00f0ff, #ff00ea);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.5em;
+            font-size: 2em;
             box-shadow: 0 0 40px rgba(0, 240, 255, 0.6);
             position: relative;
             transition: all 0.4s ease;
@@ -302,7 +302,6 @@
     <div class="container">
         <header>
             <h1>🎯 智能抽奖系统</h1>
-            <p class="subtitle">年会抽奖 | 活动抽奖 | 幸运抽奖</p>
             <div class="tech-badges">
                 <span class="tech-badge">AI 算法</span>
                 <span class="tech-badge">实时动画</span>
@@ -366,6 +365,72 @@
                     <a href="lottery-egg/vue/index.html" class="btn btn-secondary">Vue 版本</a>
                 </div>
             </div>
+            
+            <!-- 抽奖箱 -->
+            <div class="lottery-card">
+                <div class="lottery-icon"><span>🎁</span></div>
+                <h2>抽奖箱</h2>
+                <p>模拟抽奖箱抽奖，随机抽取奖品，支持动画效果</p>
+                <div class="button-group">
+                    <a href="lottery-box/native/index.html" class="btn btn-primary">原生 JavaScript</a>
+                    <a href="lottery-box/vue/index.html" class="btn btn-secondary">Vue 版本</a>
+                </div>
+            </div>
+            
+            <!-- 扭蛋机 -->
+            <div class="lottery-card">
+                <div class="lottery-icon"><span>🎰</span></div>
+                <h2>扭蛋机</h2>
+                <p>模拟扭蛋机抽奖，转动手柄获取随机奖品</p>
+                <div class="button-group">
+                    <a href="lottery-gashapon/native/index.html" class="btn btn-primary">原生 JavaScript</a>
+                    <a href="lottery-gashapon/vue/index.html" class="btn btn-secondary">Vue 版本</a>
+                </div>
+            </div>
+            
+            <!-- 翻拍抽奖 -->
+            <div class="lottery-card">
+                <div class="lottery-icon"><span>🃏</span></div>
+                <h2>翻拍抽奖</h2>
+                <p>点击卡片翻牌，查看是否中奖，支持翻牌动画</p>
+                <div class="button-group">
+                    <a href="lottery-flip/native/index.html" class="btn btn-primary">原生 JavaScript</a>
+                    <a href="lottery-flip/vue/index.html" class="btn btn-secondary">Vue 版本</a>
+                </div>
+            </div>
+            
+            <!-- 老虎机 -->
+            <div class="lottery-card">
+                <div class="lottery-icon"><span>🎰</span></div>
+                <h2>老虎机</h2>
+                <p>经典老虎机抽奖，拉动拉杆获取中奖组合</p>
+                <div class="button-group">
+                    <a href="lottery-slot/native/index.html" class="btn btn-primary">原生 JavaScript</a>
+                    <a href="lottery-slot/vue/index.html" class="btn btn-secondary">Vue 版本</a>
+                </div>
+            </div>
+            
+            <!-- 红包雨 -->
+            <div class="lottery-card">
+                <div class="lottery-icon"><span>🧧</span></div>
+                <h2>红包雨</h2>
+                <p>点击飘落的红包，查看中奖结果，支持动画效果</p>
+                <div class="button-group">
+                    <a href="lottery-redpack/native/index.html" class="btn btn-primary">原生 JavaScript</a>
+                    <a href="lottery-redpack/vue/index.html" class="btn btn-secondary">Vue 版本</a>
+                </div>
+            </div>
+            
+            <!-- 口令抽奖 -->
+            <div class="lottery-card">
+                <div class="lottery-icon"><span>🔑</span></div>
+                <h2>口令抽奖</h2>
+                <p>输入正确口令参与抽奖，支持自定义口令</p>
+                <div class="button-group">
+                    <a href="lottery-password/native/index.html" class="btn btn-primary">原生 JavaScript</a>
+                    <a href="lottery-password/vue/index.html" class="btn btn-secondary">Vue 版本</a>
+                </div>
+            </div>
         </div>
         
         <div class="config-section">
@@ -376,7 +441,7 @@
         
         <footer>
             <p>© 2026 <span class="footer-tech">智能抽奖系统</span> | 科技赋能 · 创意无限</p>
-            <p style="margin-top: 10px; font-size: 0.9em;">Powered by <span class="footer-tech">Modern Web Technologies</span></p>
+            <p style="margin-top: 10px; font-size: 0.9em;">Powered by <a href="https://github.com/tinygeeker" target="_blank" class="footer-tech">tinygeeker</a></p>
         </footer>
     </div>
 </body>
