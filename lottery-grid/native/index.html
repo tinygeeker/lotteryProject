@@ -537,7 +537,8 @@
     </div>
     
     <footer>
-        <p>© 2026 抽奖系统 | 原生 JavaScript 版本</p>
+        <p>© 2026 <span class="footer-tech">智能抽奖系统</span> | 原生 JavaScript 版本</p>
+        <p style="margin-top: 5px; font-size: 0.9em;">Powered by <span class="footer-tech">Modern Web Technologies</span></p>
     </footer>
     
     <script>
@@ -763,9 +764,9 @@
                 const item = document.createElement('div');
                 item.className = 'winner-item';
                 item.innerHTML = `
-                    <span class="winner-prize">${winner.prize}</span>
-                    <span>→</span>
-                    <span class="winner-name">${winner.name}</span>
+                    <div class="winner-prize">${winner.prize}</div>
+                    <div class="winner-name">中奖者：${winner.name}</div>
+                    <div class="winner-time">${winner.time}</div>
                 `;
                 list.appendChild(item);
             });
