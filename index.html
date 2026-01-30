@@ -11,11 +11,43 @@
             box-sizing: border-box;
         }
         body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
             color: white;
             min-height: 100vh;
             padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        /* 科技感背景线条 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(121, 219, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 107, 107, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(121, 219, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        /* 网格线效果 */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: -1;
         }
         .container {
             max-width: 1200px;
@@ -24,126 +56,265 @@
         header {
             text-align: center;
             margin-bottom: 50px;
-            padding: 30px 0;
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            backdrop-filter: blur(10px);
+            padding: 40px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shine 3s infinite;
+        }
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
         h1 {
-            font-size: 3em;
-            margin-bottom: 10px;
-            color: #e94560;
-            text-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+            font-size: 3.5em;
+            margin-bottom: 15px;
+            color: #00f0ff;
+            text-shadow: 0 0 30px rgba(0, 240, 255, 0.6);
+            font-weight: 700;
+            letter-spacing: 2px;
         }
         .subtitle {
-            font-size: 1.2em;
-            color: rgba(255,255,255,0.8);
+            font-size: 1.3em;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 10px;
+        }
+        .tech-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 20px;
+            font-size: 0.9em;
+            color: #00f0ff;
+            margin: 0 5px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 240, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 240, 255, 0); }
         }
         .lottery-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-bottom: 50px;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 35px;
+            margin-bottom: 60px;
         }
         .lottery-card {
-            background: rgba(255,255,255,0.1);
-            border-radius: 15px;
-            padding: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 35px;
             text-align: center;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-            transition: all 0.3s ease;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s ease;
             cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .lottery-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, #00f0ff, #ff00ea);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
         }
         .lottery-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            border-color: #e94560;
+            transform: translateY(-15px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4), 0 0 30px rgba(0, 240, 255, 0.1);
+            border-color: rgba(0, 240, 255, 0.3);
+        }
+        .lottery-card:hover::before {
+            transform: scaleX(1);
         }
         .lottery-icon {
-            width: 100px;
-            height: 100px;
-            margin: 0 auto 20px;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 25px;
             border-radius: 50%;
-            background: linear-gradient(45deg, #e94560, #c71636);
+            background: linear-gradient(45deg, #00f0ff, #ff00ea);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2em;
-            box-shadow: 0 0 30px rgba(233, 69, 96, 0.5);
+            font-size: 2.5em;
+            box-shadow: 0 0 40px rgba(0, 240, 255, 0.6);
+            position: relative;
+            transition: all 0.4s ease;
+        }
+        .lottery-card:hover .lottery-icon {
+            transform: scale(1.1);
+            box-shadow: 0 0 50px rgba(0, 240, 255, 0.8);
+        }
+        .lottery-icon::after {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            border-radius: 50%;
+            background: rgba(15, 12, 41, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .lottery-icon span {
+            position: relative;
+            z-index: 1;
         }
         h2 {
-            font-size: 1.5em;
+            font-size: 1.6em;
             margin-bottom: 15px;
             color: white;
+            font-weight: 600;
         }
         p {
-            color: rgba(255,255,255,0.7);
+            color: rgba(255, 255, 255, 0.7);
             margin-bottom: 25px;
+            line-height: 1.5;
         }
         .button-group {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
         }
         .btn {
-            padding: 12px 20px;
+            padding: 14px 24px;
             border: none;
             border-radius: 25px;
-            font-size: 14px;
-            font-weight: bold;
+            font-size: 15px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
             display: inline-block;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        .btn:hover::before {
+            left: 100%;
         }
         .btn-primary {
-            background: #e94560;
-            color: white;
+            background: linear-gradient(45deg, #00f0ff, #00a3ff);
+            color: #0f0c29;
         }
         .btn-primary:hover {
-            background: #c71636;
             transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 240, 255, 0.4);
         }
         .btn-secondary {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: #00f0ff;
+            border: 1px solid rgba(0, 240, 255, 0.3);
         }
         .btn-secondary:hover {
-            background: rgba(255,255,255,0.3);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
         }
         .config-section {
             text-align: center;
-            margin-top: 50px;
-            padding: 30px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            backdrop-filter: blur(10px);
+            margin-top: 60px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .config-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.1), transparent);
+            animation: shine 4s infinite;
         }
         .config-section h2 {
             margin-bottom: 20px;
+            color: #00f0ff;
+            text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
         }
         footer {
             text-align: center;
-            margin-top: 50px;
-            padding: 20px 0;
-            color: rgba(255,255,255,0.6);
-            font-size: 0.9em;
+            margin-top: 60px;
+            padding: 30px 0;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1em;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .footer-tech {
+            color: #00f0ff;
+            font-weight: 500;
+        }
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5em;
+            }
+            .lottery-grid {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+            .lottery-card {
+                padding: 25px;
+            }
+            .lottery-icon {
+                width: 100px;
+                height: 100px;
+                font-size: 2em;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🎯 抽奖系统</h1>
+            <h1>🎯 智能抽奖系统</h1>
             <p class="subtitle">年会抽奖 | 活动抽奖 | 幸运抽奖</p>
+            <div class="tech-badges">
+                <span class="tech-badge">AI 算法</span>
+                <span class="tech-badge">实时动画</span>
+                <span class="tech-badge">响应式设计</span>
+                <span class="tech-badge">数据可视化</span>
+            </div>
         </header>
         
         <div class="lottery-grid">
             <!-- 九宫格抽奖 -->
             <div class="lottery-card">
-                <div class="lottery-icon">🎰</div>
+                <div class="lottery-icon"><span>🎰</span></div>
                 <h2>九宫格抽奖</h2>
                 <p>经典的九宫格抽奖方式，点击开始按钮，指针随机停在奖品格内</p>
                 <div class="button-group">
@@ -154,7 +325,7 @@
             
             <!-- 年会大屏抽奖 -->
             <div class="lottery-card">
-                <div class="lottery-icon">📺</div>
+                <div class="lottery-icon"><span>📺</span></div>
                 <h2>年会大屏抽奖</h2>
                 <p>适合年会等大型活动的大屏抽奖，支持滚动显示参与人员</p>
                 <div class="button-group">
@@ -165,7 +336,7 @@
             
             <!-- 转盘抽奖 -->
             <div class="lottery-card">
-                <div class="lottery-icon">🎡</div>
+                <div class="lottery-icon"><span>🎡</span></div>
                 <h2>转盘抽奖</h2>
                 <p>传统的转盘抽奖，指针旋转后停在对应奖品区域</p>
                 <div class="button-group">
@@ -176,7 +347,7 @@
             
             <!-- 刮刮乐抽奖 -->
             <div class="lottery-card">
-                <div class="lottery-icon">🎫</div>
+                <div class="lottery-icon"><span>🎫</span></div>
                 <h2>刮刮乐抽奖</h2>
                 <p>模拟刮刮乐彩票的抽奖方式，用鼠标刮开涂层查看中奖结果</p>
                 <div class="button-group">
@@ -187,7 +358,7 @@
             
             <!-- 砸金蛋抽奖 -->
             <div class="lottery-card">
-                <div class="lottery-icon">🥚</div>
+                <div class="lottery-icon"><span>🥚</span></div>
                 <h2>砸金蛋抽奖</h2>
                 <p>点击金蛋砸开，查看是否中奖，支持动画效果</p>
                 <div class="button-group">
@@ -204,7 +375,8 @@
         </div>
         
         <footer>
-            <p>© 2026 抽奖系统 | 设计与开发</p>
+            <p>© 2026 <span class="footer-tech">智能抽奖系统</span> | 科技赋能 · 创意无限</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">Powered by <span class="footer-tech">Modern Web Technologies</span></p>
         </footer>
     </div>
 </body>
