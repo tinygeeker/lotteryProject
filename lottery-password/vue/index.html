@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>口令抽奖 - Vue 版本</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        /* 科技感背景线条 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        /* 网格线效果 */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .container {
+            max-width: 600px;
+            width: 90%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+        }
+        header {
+            margin-bottom: 40px;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+        .subtitle {
+            font-size: 1.2em;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .password-section {
+            margin: 40px 0;
+        }
+        .password-input {
+            width: 100%;
+            padding: 20px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            margin-bottom: 20px;
+        }
+        .password-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .password-input:focus {
+            outline: none;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            border-color: #fff;
+        }
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #667eea;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+        }
+        /* 结果弹窗 */
+        .result {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            display: none;
+            min-width: 300px;
+        }
+        .result.show {
+            display: block;
+            animation: popIn 0.3s forwards;
+        }
+        @keyframes popIn {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+        .result h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        .result p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .result .prize-emoji {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+        .close-btn {
+            margin-top: 30px;
+            padding: 12px 24px;
+            background: rgba(102, 126, 234, 0.2);
+            border: none;
+            border-radius: 20px;
+            color: #667eea;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .close-btn:hover {
+            background: rgba(102, 126, 234, 0.3);
+            transform: scale(1.05);
+        }
+        .stats {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #ffd700;
+        }
+        .config-section {
+            margin-top: 40px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .config-section h3 {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 15px;
+        }
+        .config-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .config-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            .btn {
+                padding: 12px 24px;
+                margin: 10px 0;
+                display: block;
+                width: 100%;
+            }
+            .stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="container">
+            <header>
+                <h1>🔑 口令抽奖</h1>
+                <p class="subtitle">输入正确的口令，赢取丰厚奖品！</p>
+            </header>
+            
+            <div class="password-section">
+                <input type="text" class="password-input" v-model="password" placeholder="请输入抽奖口令">
+                <button class="btn btn-primary" @click="checkPassword">提交口令</button>
+                <button class="btn btn-secondary" @click="resetForm">重置</button>
+                <button class="btn btn-secondary" @click="goBack">返回主页</button>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value">{{ totalAttempts }}</div>
+                    <div>总尝试次数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{{ winCount }}</div>
+                    <div>中奖次数</div>
+                </div>
+            </div>
+            
+            <div class="config-section">
+                <h3>⚙️ 配置</h3>
+                <input type="text" class="config-input" v-model="correctPassword" placeholder="设置正确口令 (默认: lucky)">
+                <input type="text" class="config-input" v-model="prizeConfig" placeholder="设置奖品列表 (逗号分隔)">
+            </div>
+        </div>
+        
+        <!-- 结果弹窗 -->
+        <div class="result" :class="{ show: showResult }">
+            <h2>🎉 恭喜中奖！</h2>
+            <div class="prize-emoji">{{ selectedPrize.emoji }}</div>
+            <p>获得奖品：{{ selectedPrize.name }}</p>
+            <button class="close-btn" @click="closeResult">关闭</button>
+        </div>
+        
+        <!-- 错误弹窗 -->
+        <div class="result" :class="{ show: showError }">
+            <h2>❌ 口令错误</h2>
+            <p>请输入正确的抽奖口令！</p>
+            <button class="close-btn" @click="closeError">关闭</button>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                password: '',
+                correctPassword: 'lucky',
+                prizeConfig: '',
+                prizes: [
+                    { name: '一等奖', emoji: '🏆' },
+                    { name: '二等奖', emoji: '🎁' },
+                    { name: '三等奖', emoji: '💰' },
+                    { name: '幸运奖', emoji: '🎫' }
+                ],
+                totalAttempts: 0,
+                winCount: 0,
+                showResult: false,
+                showError: false,
+                selectedPrize: { name: '', emoji: '' }
+            },
+            methods: {
+                // 检查口令
+                checkPassword() {
+                    const inputPassword = this.password.trim();
+                    this.totalAttempts++;
+                    
+                    if (inputPassword === this.correctPassword) {
+                        // 口令正确，随机抽奖
+                        this.selectedPrize = this.drawPrize();
+                        this.showResult = true;
+                        this.winCount++;
+                    } else {
+                        // 口令错误
+                        this.showError = true;
+                    }
+                },
+                
+                // 重置表单
+                resetForm() {
+                    this.password = '';
+                },
+                
+                // 抽奖逻辑
+                drawPrize() {
+                    const randomIndex = Math.floor(Math.random() * this.prizes.length);
+                    return this.prizes[randomIndex];
+                },
+                
+                // 关闭结果弹窗
+                closeResult() {
+                    this.showResult = false;
+                },
+                
+                // 关闭错误弹窗
+                closeError() {
+                    this.showError = false;
+                },
+                
+                // 返回主页
+                goBack() {
+                    location.href = '../../index.html';
+                }
+            },
+            watch: {
+                // 监听奖品配置变化
+                prizeConfig(newValue) {
+                    if (newValue) {
+                        const prizeList = newValue.split(',').map(prize => {
+                            return { name: prize.trim(), emoji: '🎁' };
+                        });
+                        this.prizes = prizeList;
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

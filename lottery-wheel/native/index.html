@@ -68,6 +68,25 @@
             position: relative;
             overflow: hidden;
         }
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 40px;
+            gap: 40px;
+        }
+        .header-content {
+            flex: 1;
+        }
+        .winner-section {
+            width: 350px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            height: fit-content;
+        }
         header::before {
             content: '';
             position: absolute;
@@ -106,17 +125,7 @@
             flex-direction: column;
             align-items: center;
         }
-        .right-section {
-            width: 350px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 30px;
-            position: sticky;
-            top: 40px;
-            height: fit-content;
-        }
+
         .wheel-wrapper {
             position: relative;
             margin-bottom: 40px;
@@ -512,12 +521,12 @@
         }
         /* 响应式设计 */
         @media (max-width: 1024px) {
-            .main-content {
+            .header-row {
                 flex-direction: column;
+                gap: 30px;
             }
-            .right-section {
+            .winner-section {
                 width: 100%;
-                position: static;
             }
         }
         @media (max-width: 768px) {
@@ -551,45 +560,49 @@
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>🎡 转盘抽奖</h1>
-            <p class="subtitle">点击中心按钮，转盘旋转后停在哪个区域就获得对应奖品</p>
-        </header>
-        
-        <div class="main-content">
-            <div class="left-section">
-                <div class="wheel-wrapper">
-                    <div class="wheel" id="wheel">
-                        <!-- 奖品扇形将通过JavaScript动态生成 -->
-                    </div>
-                    <div class="wheel-center" id="wheelCenter" onclick="spinWheel()"></div>
-                </div>
+        <div class="header-row">
+            <div class="header-content">
+                <header>
+                    <h1>🎡 转盘抽奖</h1>
+                    <p class="subtitle">点击中心按钮，转盘旋转后停在哪个区域就获得对应奖品</p>
+                </header>
                 
-                <div class="stats">
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <div class="stat-value" id="prizeCount">0</div>
-                            <div class="stat-label">奖品数量</div>
+                <div class="main-content">
+                    <div class="left-section">
+                        <div class="wheel-wrapper">
+                            <div class="wheel" id="wheel">
+                                <!-- 奖品扇形将通过JavaScript动态生成 -->
+                            </div>
+                            <div class="wheel-center" id="wheelCenter" onclick="spinWheel()"></div>
                         </div>
-                        <div class="stat-item">
-                            <div class="stat-value" id="participantCount">0</div>
-                            <div class="stat-label">参与人数</div>
+                        
+                        <div class="stats">
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <div class="stat-value" id="prizeCount">0</div>
+                                    <div class="stat-label">奖品数量</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="participantCount">0</div>
+                                    <div class="stat-label">参与人数</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="winnerCount">0</div>
+                                    <div class="stat-label">中奖人数</div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="stat-item">
-                            <div class="stat-value" id="winnerCount">0</div>
-                            <div class="stat-label">中奖人数</div>
+                        
+                        <div class="controls">
+                            <button class="btn btn-primary" id="spinBtn" onclick="spinWheel()">开始抽奖</button>
+                            <button class="btn btn-secondary" onclick="resetLottery()">重置抽奖</button>
+                            <button class="btn btn-secondary" onclick="location.href='../../index.html'">返回主页</button>
                         </div>
                     </div>
-                </div>
-                
-                <div class="controls">
-                    <button class="btn btn-primary" id="spinBtn" onclick="spinWheel()">开始抽奖</button>
-                    <button class="btn btn-secondary" onclick="resetLottery()">重置抽奖</button>
-                    <button class="btn btn-secondary" onclick="location.href='../../index.html'">返回主页</button>
                 </div>
             </div>
             
-            <div class="right-section">
+            <div class="winner-section">
                 <h2 class="section-title">🏆 中奖记录</h2>
                 <div class="winner-list" id="winnerList"></div>
             </div>

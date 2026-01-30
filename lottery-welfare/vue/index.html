@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>福彩抽奖 - Vue 版本</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 50%, #da4453 100%);
+            color: #333;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(255, 255, 255, 0.05),
+                rgba(255, 255, 255, 0.05) 10px,
+                rgba(255, 255, 255, 0.03) 10px,
+                rgba(255, 255, 255, 0.03) 20px
+            );
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            color: #d63031;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .welfare-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .winning-number-section {
+            background: #ff4757;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .winning-number-section h2 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .winning-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 10px 0;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .prize-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .prize-cell {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prize-cell:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            border-color: #ff6b6b;
+        }
+
+        .prize-cell.selected {
+            background: #ffeaa7;
+            border-color: #f39c12;
+            box-shadow: 0 0 20px rgba(243, 156, 18, 0.3);
+        }
+
+        .prize-cell.matched {
+            background: #d5f5e3;
+            border-color: #27ae60;
+            box-shadow: 0 0 20px rgba(39, 174, 96, 0.3);
+        }
+
+        .prize-number {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .prize-amount {
+            font-size: 0.9em;
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .controls {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a6f);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #6c5ce7, #a29bfe);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 10px 20px rgba(108, 92, 231, 0.4);
+        }
+
+        .result-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            border: 2px solid #6c5ce7;
+            box-shadow: 0 10px 20px rgba(108, 92, 231, 0.2);
+        }
+
+        .result-section h2 {
+            color: #6c5ce7;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .result-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-item .prize {
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal h2 {
+            color: #27ae60;
+            margin-bottom: 20px;
+        }
+
+        .modal .prize-amount {
+            font-size: 2em;
+            margin: 20px 0;
+            color: #27ae60;
+        }
+
+        .firework {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #f1c40f;
+            border-radius: 50%;
+            animation: firework 1s ease-out forwards;
+        }
+
+        @keyframes firework {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(3) translateY(-50px);
+                opacity: 0;
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .prize-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+
+            .prize-cell {
+                padding: 10px;
+            }
+
+            .winning-number {
+                font-size: 2em;
+            }
+
+            .btn {
+                display: block;
+                margin: 10px auto;
+                width: 80%;
+                max-width: 200px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .prize-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .welfare-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="container">
+            <header>
+                <h1>🎊 福彩抽奖</h1>
+                <p class="subtitle">刮开覆盖膜，如果任意一个"我的号码"与"中奖号码"相同，即可获得"我的号码"下方对应列的奖金，中奖奖金累加。</p>
+            </header>
+
+            <div class="welfare-container">
+                <div class="winning-number-section">
+                    <h2>中奖号码</h2>
+                    <div class="winning-number">{{ winningNumber || '--' }}</div>
+                </div>
+
+                <h3 style="text-align: center; margin-bottom: 20px; color: #333;">我的号码</h3>
+                <div class="prize-grid">
+                    <div 
+                        v-for="(prize, index) in prizeGrid" 
+                        :key="index"
+                        class="prize-cell"
+                        :class="{
+                            selected: selectedNumbers.includes(prize),
+                            matched: matchedNumbers.includes(prize)
+                        }"
+                        @click="selectPrize(prize)"
+                    >
+                        <div class="prize-number">{{ prize.number.toString().padStart(2, '0') }}</div>
+                        <div class="prize-amount">¥{{ prize.amount }}</div>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button class="btn" @click="generateWinningNumber">生成号码</button>
+                    <button class="btn btn-secondary" @click="checkWin">检查中奖</button>
+                    <button class="btn" @click="resetGame">重置</button>
+                    <button class="btn btn-secondary" @click="goBack">返回主页</button>
+                </div>
+            </div>
+
+            <div class="result-section">
+                <h2>🎁 中奖记录</h2>
+                <div>
+                    <div v-for="(result, index) in resultHistory" :key="index" class="result-item">
+                        <span>{{ result.time }}</span>
+                        <span class="prize">
+                            {{ result.amount > 0 ? `¥${result.amount}` : '未中奖' }}
+                            (中奖号码: {{ result.winningNumber }}, 选择: {{ result.selectedCount }}个)
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 中奖弹窗 -->
+        <div class="modal" :class="{ show: showWinModal }">
+            <div class="modal-content" @click="closeWinModal">
+                <h2>🎉 恭喜中奖！</h2>
+                <div class="prize-amount">¥{{ winAmount }}</div>
+                <p>点击任意位置关闭</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                prizes: [
+                    { number: 1, amount: 30 },
+                    { number: 2, amount: 1000 },
+                    { number: 3, amount: 20 },
+                    { number: 4, amount: 50 },
+                    { number: 5, amount: 20 },
+                    { number: 6, amount: 20 },
+                    { number: 7, amount: 40 },
+                    { number: 8, amount: 50 },
+                    { number: 9, amount: 100 },
+                    { number: 10, amount: 1000 },
+                    { number: 11, amount: 200000 },
+                    { number: 12, amount: 100 },
+                    { number: 13, amount: 500 },
+                    { number: 14, amount: 60 },
+                    { number: 15, amount: 500 },
+                    { number: 16, amount: 100 },
+                    { number: 17, amount: 40 },
+                    { number: 18, amount: 30 },
+                    { number: 19, amount: 30 },
+                    { number: 20, amount: 50 },
+                    { number: 21, amount: 60 },
+                    { number: 22, amount: 100 },
+                    { number: 23, amount: 20 },
+                    { number: 24, amount: 40 },
+                    { number: 25, amount: 40 }
+                ],
+                prizeGrid: [],
+                winningNumber: 0,
+                selectedNumbers: [],
+                matchedNumbers: [],
+                resultHistory: [],
+                showWinModal: false,
+                winAmount: 0
+            },
+            mounted() {
+                this.generatePrizeGrid();
+            },
+            methods: {
+                // 生成奖品网格
+                generatePrizeGrid() {
+                    // 随机打乱奖品顺序
+                    const shuffledPrizes = [...this.prizes].sort(() => Math.random() - 0.5).slice(0, 15);
+                    this.prizeGrid = shuffledPrizes;
+                },
+                
+                // 选择奖品
+                selectPrize(prize) {
+                    if (!this.winningNumber) return;
+                    
+                    const index = this.selectedNumbers.indexOf(prize);
+                    if (index > -1) {
+                        this.selectedNumbers.splice(index, 1);
+                    } else {
+                        this.selectedNumbers.push(prize);
+                    }
+                },
+                
+                // 生成中奖号码
+                generateWinningNumber() {
+                    this.winningNumber = Math.floor(Math.random() * 25) + 1;
+                    this.selectedNumbers = [];
+                    this.matchedNumbers = [];
+                },
+                
+                // 检查中奖
+                checkWin() {
+                    if (!this.winningNumber) {
+                        alert('请先生成中奖号码');
+                        return;
+                    }
+                    
+                    if (this.selectedNumbers.length === 0) {
+                        alert('请选择至少一个号码');
+                        return;
+                    }
+                    
+                    let totalWin = 0;
+                    this.matchedNumbers = [];
+                    
+                    // 检查匹配的号码
+                    this.selectedNumbers.forEach(selected => {
+                        if (selected.number === this.winningNumber) {
+                            totalWin += selected.amount;
+                            this.matchedNumbers.push(selected);
+                        }
+                    });
+                    
+                    // 显示中奖结果
+                    if (totalWin > 0) {
+                        this.winAmount = totalWin;
+                        this.showWinModal = true;
+                        this.createFireworks();
+                        this.addToResultHistory(totalWin);
+                    } else {
+                        alert('很遗憾，未中奖');
+                        this.addToResultHistory(0);
+                    }
+                },
+                
+                // 创建烟花效果
+                createFireworks() {
+                    for (let i = 0; i < 20; i++) {
+                        const firework = document.createElement('div');
+                        firework.className = 'firework';
+                        firework.style.left = Math.random() * 100 + '%';
+                        firework.style.top = Math.random() * 100 + '%';
+                        document.body.appendChild(firework);
+                        
+                        setTimeout(() => {
+                            firework.remove();
+                        }, 1000);
+                    }
+                },
+                
+                // 添加到中奖记录
+                addToResultHistory(amount) {
+                    const now = new Date();
+                    const timeString = now.toLocaleString();
+                    
+                    const result = {
+                        time: timeString,
+                        amount: amount,
+                        winningNumber: this.winningNumber,
+                        selectedCount: this.selectedNumbers.length
+                    };
+                    
+                    this.resultHistory.unshift(result);
+                },
+                
+                // 重置游戏
+                resetGame() {
+                    this.winningNumber = 0;
+                    this.selectedNumbers = [];
+                    this.matchedNumbers = [];
+                },
+                
+                // 关闭中奖弹窗
+                closeWinModal() {
+                    this.showWinModal = false;
+                },
+                
+                // 返回主页
+                goBack() {
+                    location.href = '../../index.html';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

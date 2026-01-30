@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>扭蛋机 - Vue 版本</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(255, 255, 255, 0.03),
+                rgba(255, 255, 255, 0.03) 10px,
+                rgba(255, 255, 255, 0.02) 10px,
+                rgba(255, 255, 255, 0.02) 20px
+            );
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            gap: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .results-panel {
+            width: 300px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(94, 234, 212, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            overflow-y: auto;
+            max-height: 80vh;
+        }
+
+        h1 {
+            text-align: center;
+            background: linear-gradient(135deg, #5eead4 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 30px;
+            font-size: 28px;
+            position: relative;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #5eead4, transparent);
+        }
+
+        .control-panel {
+            text-align: center;
+            margin: 30px 0;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(94, 234, 212, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .gacha-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+            margin: 30px 0;
+        }
+
+        .gacha-machine {
+            position: relative;
+            width: 350px;
+            height: 500px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            border-radius: 20px 20px 40px 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: machinePulse 3s infinite;
+        }
+
+        @keyframes machinePulse {
+            0% {
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 0 rgba(0, 240, 255, 0.3);
+            }
+            50% {
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 30px rgba(0, 240, 255, 0.5);
+            }
+            100% {
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 0 rgba(0, 240, 255, 0.3);
+            }
+        }
+
+        .gacha-top {
+            width: 100%;
+            height: 100px;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .gacha-top::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2), transparent 70%);
+            border-radius: 8px;
+        }
+
+        .gacha-body {
+            width: 100%;
+            flex: 1;
+            background: rgba(0, 0, 0, 0.1);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+        }
+
+        .gacha-body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), transparent 50%);
+        }
+
+        .balls-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 220px;
+            height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .ball {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            animation: ballFloat 3s ease-in-out infinite;
+            opacity: 1;
+        }
+
+        .ball.spinning {
+            animation: ballSpin 0.5s linear infinite;
+        }
+
+        .ball.coming-out {
+            animation: ballComeOut 1s ease-out forwards;
+        }
+
+        @keyframes ballFloat {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes ballSpin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes ballComeOut {
+            0% {
+                transform: scale(1) translate(0, 0);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2) translate(0, 50px);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1) translate(0, 100px);
+                opacity: 0;
+            }
+        }
+
+        .result-ball {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #8b4513;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            opacity: 0;
+        }
+
+        .result-ball.show {
+            animation: ballDrop 1s ease-out forwards;
+        }
+
+        @keyframes ballDrop {
+            0% {
+                transform: translateX(-50%) translateY(-100px) scale(0.5);
+                opacity: 0;
+            }
+            70% {
+                transform: translateX(-50%) translateY(20px) scale(1.1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(-50%) translateY(0px) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .gacha-handle {
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            border-radius: 50%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .gacha-handle:hover {
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .gacha-handle.active {
+            animation: handleRotate 2s ease-in-out forwards;
+        }
+
+        @keyframes handleRotate {
+            0% {
+                transform: translateY(-50%) rotate(0deg);
+            }
+            100% {
+                transform: translateY(-50%) rotate(360deg);
+            }
+        }
+
+        .gacha-bottom {
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+            border-radius: 0 0 30px 30px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gacha-outlet {
+            width: 100px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gacha-outlet::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            margin: 10px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.6);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #5eead4 0%, #2dd4bf 100%);
+            box-shadow: 0 4px 12px rgba(94, 234, 212, 0.4);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 6px 16px rgba(94, 234, 212, 0.6);
+        }
+
+        .results-panel h3 {
+            text-align: center;
+            color: #5eead4;
+            margin-bottom: 20px;
+            font-size: 18px;
+            border-bottom: 1px solid rgba(94, 234, 212, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .current-result {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .current-result h4 {
+            color: #3b82f6;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .current-result .prize-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fbbf24;
+            margin: 10px 0;
+        }
+
+        .winner-history {
+            margin-top: 20px;
+        }
+
+        .winner-history h4 {
+            color: #94a3b8;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .winner-list {
+            list-style: none;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .winner-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .winner-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(94, 234, 212, 0.3);
+            transform: translateX(5px);
+        }
+
+        .winner-item .prize {
+            font-weight: bold;
+            color: #5eead4;
+            margin-right: 5px;
+        }
+
+        .winner-item .time {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 5px;
+        }
+
+        .result-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .result-modal.show {
+            display: flex;
+        }
+
+        .result-content {
+            background: rgba(30, 41, 59, 0.95);
+            border: 1px solid rgba(94, 234, 212, 0.5);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            max-width: 400px;
+            width: 90%;
+            backdrop-filter: blur(10px);
+        }
+
+        .result-title {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #5eead4 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+
+        .result-prize {
+            font-size: 28px;
+            font-weight: bold;
+            color: #fbbf24;
+            margin: 20px 0;
+            text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+        }
+
+        .spark {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #fbbf24;
+            border-radius: 50%;
+            animation: spark 1s ease-out forwards;
+            box-shadow: 0 0 10px #fbbf24, 0 0 20px #fbbf24;
+        }
+
+        @keyframes spark {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0) translate(var(--tx), var(--ty));
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .results-panel {
+                width: 100%;
+                max-height: 400px;
+            }
+
+            .gacha-machine {
+                width: 300px;
+                height: 450px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+                gap: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .gacha-machine {
+                width: 250px;
+                height: 400px;
+                padding: 20px;
+            }
+
+            .gacha-handle {
+                width: 50px;
+                height: 50px;
+                right: -25px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="container">
+            <div class="main-content">
+                <h1>🎊 扭蛋机</h1>
+                
+                <div class="control-panel">
+                    <button class="btn" :disabled="isGachaing" @click="startGacha">{{ isGachaing ? '扭蛋中...' : '开始扭蛋' }}</button>
+                    <button class="btn btn-secondary" @click="goBack">返回主页</button>
+                </div>
+
+                <div class="gacha-container">
+                    <div class="gacha-machine">
+                        <div class="gacha-top">
+                            <div style="font-size: 24px; font-weight: bold; color: white; text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);">扭蛋机</div>
+                        </div>
+                        <div class="gacha-body">
+                            <div class="balls-container" id="balls-container">
+                                <div 
+                                    v-for="(ball, index) in balls" 
+                                    :key="index"
+                                    class="ball"
+                                    :class="{ spinning: isSpinning, 'coming-out': selectedBallIndex === index }"
+                                    :style="{
+                                        backgroundColor: ball.color,
+                                        transform: `translate(${ball.x}px, ${ball.y}px)`,
+                                        animationDelay: ball.delay + 's'
+                                    }"
+                                >
+                                    {{ ball.emoji }}
+                                </div>
+                            </div>
+                            <div class="result-ball" id="result-ball" :class="{ show: showResultBall }">
+                                {{ resultEmoji }}
+                            </div>
+                            <div class="gacha-handle" id="gacha-handle" :class="{ active: isGachaing }"></div>
+                        </div>
+                        <div class="gacha-bottom">
+                            <div class="gacha-outlet"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-panel">
+                <h3>抽奖结果</h3>
+                <div class="current-result" id="current-result">
+                    <h4>当前结果</h4>
+                    <div class="prize-name" id="current-prize">{{ currentPrize }}</div>
+                </div>
+                <div class="winner-history">
+                    <h4>中奖记录</h4>
+                    <ul class="winner-list" id="winner-list">
+                        <li v-for="(item, index) in winnerHistory" :key="index" class="winner-item">
+                            <span class="prize">{{ item.prize }}</span>
+                            <div class="time">{{ item.time }}</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="result-modal" id="result-modal" :class="{ show: showModal }">
+            <div class="result-content">
+                <div class="result-title">恭喜中奖！</div>
+                <div class="result-prize">{{ selectedPrize.title }}</div>
+                <button class="btn" @click="closeModal">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                config: {
+                    prizes: [],
+                    participants: []
+                },
+                balls: [],
+                isGachaing: false,
+                isSpinning: false,
+                selectedBallIndex: -1,
+                showResultBall: false,
+                resultEmoji: '',
+                currentPrize: '等待抽奖',
+                selectedPrize: {},
+                winnerHistory: [],
+                showModal: false
+            },
+            mounted() {
+                this.loadConfig();
+                this.generateBalls();
+            },
+            methods: {
+                // 加载配置
+                async loadConfig() {
+                    try {
+                        const response = await fetch('../../config/lottery_config.json');
+                        const data = await response.json();
+                        this.config = data;
+                    } catch (error) {
+                        console.error('加载配置失败:', error);
+                        // 使用默认配置
+                        this.config.prizes = [
+                            { title: '一等奖', probability: 5 },
+                            { title: '二等奖', probability: 10 },
+                            { title: '三等奖', probability: 15 },
+                            { title: '四等奖', probability: 20 },
+                            { title: '五等奖', probability: 50 }
+                        ];
+                    }
+                },
+                
+                // 生成多个球
+                generateBalls() {
+                    this.balls = [];
+                    const ballColors = ['#ff6b6b', '#4ecdc4', '#45b7aa', '#ffd93d', '#6a0572', '#ab83a1', '#fcbf49', '#eae2b7'];
+                    const emojis = ['🎁', '🏆', '💰', '🎊', '🎉', '🎯', '🎨', '🎭'];
+                    
+                    // 生成8个球
+                    for (let i = 0; i < 8; i++) {
+                        const angle = (i / 8) * Math.PI * 2;
+                        const radius = 80;
+                        const x = Math.cos(angle) * radius;
+                        const y = Math.sin(angle) * radius;
+                        
+                        this.balls.push({
+                            color: ballColors[Math.floor(Math.random() * ballColors.length)],
+                            emoji: emojis[Math.floor(Math.random() * emojis.length)],
+                            x: x,
+                            y: y,
+                            delay: Math.random() * 2
+                        });
+                    }
+                },
+                
+                // 开始扭蛋
+                startGacha() {
+                    if (this.isGachaing) return;
+                    
+                    this.isGachaing = true;
+                    this.isSpinning = true;
+                    this.selectedBallIndex = -1;
+                    this.showResultBall = false;
+                    this.resultEmoji = '';
+                    
+                    // 创建火花效果
+                    this.createSparks();
+                    
+                    // 延迟选择奖品
+                    setTimeout(() => {
+                        // 随机选择奖品
+                        this.selectedPrize = this.getRandomPrize();
+                        
+                        // 停止旋转
+                        this.isSpinning = false;
+                        
+                        // 随机选择一个球出来
+                        this.selectedBallIndex = Math.floor(Math.random() * this.balls.length);
+                        this.resultEmoji = this.balls[this.selectedBallIndex].emoji;
+                        
+                        // 延迟显示结果球
+                        setTimeout(() => {
+                            // 显示结果球
+                            this.showResultBall = true;
+                            
+                            // 延迟显示结果
+                            setTimeout(() => {
+                                this.showModal = true;
+                                this.currentPrize = this.selectedPrize.title;
+                                this.addToWinnerHistory(this.selectedPrize);
+                                
+                                // 重新生成球
+                                setTimeout(() => {
+                                    this.generateBalls();
+                                    this.isGachaing = false;
+                                }, 1000);
+                            }, 1500);
+                        }, 1000);
+                    }, 2000);
+                },
+                
+                // 随机选择奖品
+                getRandomPrize() {
+                    if (this.config.prizes.length === 0) {
+                        return { title: '谢谢参与', description: '很遗憾，没有中奖' };
+                    }
+                    
+                    // 计算总概率
+                    const totalProbability = this.config.prizes.reduce((sum, prize) => sum + (prize.probability || 1), 0);
+                    let random = Math.random() * totalProbability;
+                    
+                    for (const prize of this.config.prizes) {
+                        random -= (prize.probability || 1);
+                        if (random <= 0) {
+                            return prize;
+                        }
+                    }
+                    
+                    return this.config.prizes[0];
+                },
+                
+                // 添加到中奖记录
+                addToWinnerHistory(prize) {
+                    const now = new Date();
+                    const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+                    
+                    const winnerItem = {
+                        prize: prize.title,
+                        time: timeString
+                    };
+                    
+                    this.winnerHistory.unshift(winnerItem);
+                },
+                
+                // 创建火花效果
+                createSparks() {
+                    const machine = document.querySelector('.gacha-machine');
+                    const rect = machine.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    
+                    for (let i = 0; i < 30; i++) {
+                        const spark = document.createElement('div');
+                        spark.className = 'spark';
+                        spark.style.left = `${centerX}px`;
+                        spark.style.top = `${centerY}px`;
+                        
+                        // 随机方向
+                        const angle = Math.random() * Math.PI * 2;
+                        const distance = Math.random() * 100 + 50;
+                        const tx = Math.cos(angle) * distance;
+                        const ty = Math.sin(angle) * distance;
+                        
+                        spark.style.setProperty('--tx', `${tx}px`);
+                        spark.style.setProperty('--ty', `${ty}px`);
+                        spark.style.animationDelay = `${Math.random() * 0.3}s`;
+                        
+                        document.body.appendChild(spark);
+                        
+                        // 动画结束后移除
+                        setTimeout(() => {
+                            spark.remove();
+                        }, 1000);
+                    }
+                },
+                
+                // 关闭模态框
+                closeModal() {
+                    this.showModal = false;
+                },
+                
+                // 返回主页
+                goBack() {
+                    location.href = '../../index.html';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

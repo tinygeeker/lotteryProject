@@ -68,6 +68,25 @@
             position: relative;
             overflow: hidden;
         }
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 40px;
+            gap: 40px;
+        }
+        .header-content {
+            flex: 1;
+        }
+        .winner-section {
+            width: 350px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            height: fit-content;
+        }
         header::before {
             content: '';
             position: absolute;
@@ -106,17 +125,7 @@
             flex-direction: column;
             align-items: center;
         }
-        .right-section {
-            width: 350px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 30px;
-            position: sticky;
-            top: 40px;
-            height: fit-content;
-        }
+
         .lottery-board {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -460,18 +469,21 @@
         }
         /* 响应式设计 */
         @media (max-width: 1024px) {
-            .main-content {
+            .header-row {
                 flex-direction: column;
+                gap: 30px;
             }
-            .right-section {
+            .winner-section {
                 width: 100%;
-                position: static;
             }
             .lottery-board {
                 max-width: 450px;
             }
         }
         @media (max-width: 768px) {
+            header {
+                padding: 20px;
+            }
             h1 {
                 font-size: 2.2em;
             }
@@ -502,24 +514,28 @@
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>🎰 九宫格抽奖</h1>
-            <p class="subtitle">点击开始按钮，幸运指针将随机停在奖品格内</p>
-        </header>
-        
-        <div class="main-content">
-            <div class="left-section">
-                <div class="lottery-board" id="lotteryBoard">
-                    <!-- 奖品格子将通过JavaScript动态生成 -->
-                </div>
+        <div class="header-row">
+            <div class="header-content">
+                <header>
+                    <h1>🎰 九宫格抽奖</h1>
+                    <p class="subtitle">点击开始按钮，指针随机停在奖品格内</p>
+                </header>
                 
-                <div class="controls">
-                    <button class="btn btn-primary" onclick="resetLottery()">重置抽奖</button>
-                    <button class="btn btn-secondary" onclick="location.href='../../index.html'">返回主页</button>
+                <div class="main-content">
+                    <div class="left-section">
+                        <div class="lottery-board" id="lotteryBoard">
+                            <!-- 奖品格子将通过JavaScript动态生成 -->
+                        </div>
+                        
+                        <div class="controls">
+                            <button class="btn btn-primary" onclick="resetLottery()">重置抽奖</button>
+                            <button class="btn btn-secondary" onclick="location.href='../../index.html'">返回主页</button>
+                        </div>
+                    </div>
                 </div>
             </div>
             
-            <div class="right-section">
+            <div class="winner-section">
                 <h2 class="section-title">🏆 中奖记录</h2>
                 <div class="winner-list" id="winnerList"></div>
             </div>
